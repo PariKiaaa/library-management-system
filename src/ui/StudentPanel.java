@@ -1,0 +1,610 @@
+package src.ui;
+
+import src.model.Book;
+import src.model.Student;
+import src.repository.BookRepository;
+import src.repository.LoanRepository;
+import src.repository.ReservationRepository;
+import src.service.BookService;
+import src.service.LoanService;
+import src.service.ReservationService;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.io.File;
+import java.util.List;
+
+/**
+ * Student dashboard.
+ */
+public class StudentPanel extends JFrame {
+
+    private final Student student;
+
+    private final BookRepository bookRepository;
+    private final LoanRepository loanRepository;
+    private final ReservationRepository reservationRepository;
+
+    private final BookService bookService;
+    private final LoanService loanService;
+    private final ReservationService reservationService;
+
+    private JTable bookTable;
+    private DefaultTableModel tableModel;
+
+    private JTextField searchField;
+
+    private JButton loanButton;
+    private JButton returnBookButton;
+    private JButton searchButton;
+    private JButton reserveButton;
+    private JButton extendButton;
+    private JButton myLoansButton;
+
+    private Timer autoRefreshTimer;
+
+    // Colors
+    private final Color PRIMARY_COLOR = new Color(255, 107, 107);
+    private final Color SECONDARY_COLOR = new Color(78, 205, 196);
+    private final Color BACKGROUND_COLOR = new Color(247, 218, 181);
+    private final Color HEADER_COLOR = new Color(247, 218, 181);
+    // private final Color BUTTON_COLOR = new Color(52, 152, 219);
+    private final Color TABLE_ALTERNATE_COLOR = new Color(236, 240, 241);
+    private final Color SELECTION_COLOR = new Color(52, 152, 219);
+    private final Color SELECTION_TEXT_COLOR = Color.WHITE;
+    // private final Color TEXT_COLOR = Color.BLACK;
+
+    public StudentPanel(Student student) {
+
+        this.student = student;
+
+        bookRepository = new BookRepository();
+        loanRepository = new LoanRepository();
+        reservationRepository = new ReservationRepository();
+
+        bookService = new BookService(bookRepository);
+        loanService = new LoanService(bookRepository, loanRepository);
+        reservationService = new ReservationService(
+                reservationRepository,
+                bookRepository,
+                loanService
+        );
+
+        initializeFrame();
+        initializeTable();
+        initializeTopPanel();
+        initializeBottomPanel();
+
+        loadBooks(bookService.getAllBooks());
+    }
+
+    private void initializeFrame() {
+
+        setTitle("پنل دانشجو - " + student.getFirstName());
+        setSize(1000, 600);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        getContentPane().setBackground(BACKGROUND_COLOR);
+
+        try {
+            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+            UIManager.put("nimbusBase", PRIMARY_COLOR);
+            UIManager.put("nimbusBlueGrey", SECONDARY_COLOR);
+            UIManager.put("control", BACKGROUND_COLOR);
+            
+            Font defaultFont = new Font("Tahoma", Font.PLAIN, 16);
+            Font boldFont = new Font("Tahoma", Font.BOLD, 16);
+            
+            UIManager.put("Button.font", defaultFont);
+            UIManager.put("Label.font", defaultFont);
+            UIManager.put("TextField.font", defaultFont);
+            UIManager.put("Table.font", defaultFont);
+            UIManager.put("TableHeader.font", boldFont);
+            UIManager.put("OptionPane.font", defaultFont);
+            
+            UIManager.put("Button.foreground", Color.BLACK);
+            UIManager.put("Label.foreground", Color.BLACK);
+            UIManager.put("TextField.foreground", Color.BLACK);
+            UIManager.put("Table.foreground", Color.BLACK);
+            UIManager.put("TableHeader.foreground", Color.BLACK);
+
+        } catch (Exception e) {
+            // Fallback to default
+        }
+
+        setLayout(new BorderLayout(10, 10));
+
+        // Header Panel
+        JPanel headerPanel = new JPanel();
+        headerPanel.setBackground(HEADER_COLOR);
+        headerPanel.setPreferredSize(new Dimension(0, 60));
+        headerPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+        headerPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        
+        JLabel headerLabel = new JLabel("پنل دانشجو - " + student.getFirstName() + " " + student.getLastName());
+        headerLabel.setFont(new Font("Tahoma", Font.BOLD, 22));
+        headerLabel.setForeground(Color.BLACK);
+        headerPanel.add(headerLabel);
+        
+        add(headerPanel, BorderLayout.NORTH);
+    }
+
+    private void initializeTable() {
+
+        tableModel = new DefaultTableModel(
+                new Object[]{
+                        "تصویر",
+                        "ISBN",
+                        "عنوان",
+                        "نویسنده",
+                        "دسته‌بندی",
+                        "موجود"
+                }, 0) {
+
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+
+        };
+
+        bookTable = new JTable(tableModel);
+        bookTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        bookTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        bookTable.setRowHeight(65);
+        bookTable.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        bookTable.setBackground(Color.WHITE);
+        bookTable.setForeground(Color.BLACK);
+        bookTable.setGridColor(new Color(236, 240, 241));
+        bookTable.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        
+        bookTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                setHorizontalAlignment(SwingConstants.RIGHT);
+                if (isSelected) {
+                    c.setBackground(SELECTION_COLOR);
+                    c.setForeground(SELECTION_TEXT_COLOR);
+                } else {
+                    c.setBackground(row % 2 == 0 ? Color.WHITE : TABLE_ALTERNATE_COLOR);
+                    c.setForeground(Color.BLACK);
+                }
+                return c;
+            }
+        });
+        
+        bookTable.getColumnModel().getColumn(0).setCellRenderer(new ImageRenderer());
+        
+        JTableHeader header = bookTable.getTableHeader();
+        header.setBackground(HEADER_COLOR);
+        header.setForeground(Color.BLACK);
+        header.setFont(new Font("Tahoma", Font.BOLD, 17));
+        header.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        ((DefaultTableCellRenderer)header.getDefaultRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
+        
+        setColumnSizes(bookTable, new int[]{60, 100, 200, 150, 120, 80});
+
+        JScrollPane scrollPane = new JScrollPane(bookTable);
+        scrollPane.setBorder(BorderFactory.createLineBorder(PRIMARY_COLOR, 1));
+        add(scrollPane, BorderLayout.CENTER);
+    }
+
+    private void initializeTopPanel() {
+
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        panel.setBackground(BACKGROUND_COLOR);
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        panel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+
+        JLabel searchLabel = new JLabel("عنوان:");
+        searchLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
+        searchLabel.setForeground(Color.BLACK);
+        panel.add(searchLabel);
+
+        searchField = new JTextField(20);
+        searchField.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        searchField.setForeground(Color.BLACK);
+        searchField.setBackground(Color.WHITE);
+        searchField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(PRIMARY_COLOR, 1),
+            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+        panel.add(searchField);
+
+        searchButton = createStyledButton("جستجو", new Color(52, 152, 219));
+        searchButton.addActionListener(e -> searchBook());
+        panel.add(searchButton);
+
+        refreshButton = createStyledButton("بروزرسانی", new Color(52, 152, 219));
+        refreshButton.addActionListener(e -> {
+            bookRepository.load();
+            loanRepository.load();
+            reservationRepository.load();
+            loadBooks(bookService.getAllBooks());
+        });
+        panel.add(refreshButton);
+
+        add(panel, BorderLayout.NORTH);
+    }
+
+    private void initializeBottomPanel() {
+
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        panel.setBackground(HEADER_COLOR);
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        panel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+
+        reserveButton = createStyledButton("رزرو", new Color(255, 159, 67));
+        extendButton = createStyledButton("تمدید", new Color(52, 152, 219));
+        loanButton = createStyledButton("امانت", new Color(46, 204, 113));
+        returnBookButton = createStyledButton("بازگشت کتاب", new Color(231, 76, 60));
+        myLoansButton = createStyledButton("کتاب‌های من", new Color(155, 89, 182));
+
+        reserveButton.addActionListener(e -> reserveBook());
+        extendButton.addActionListener(e -> extendLoan());
+        loanButton.addActionListener(e -> loanBook());
+        returnBookButton.addActionListener(e -> returnBook());
+        myLoansButton.addActionListener(e -> showMyLoans());
+
+        panel.add(reserveButton);
+        panel.add(extendButton);
+        panel.add(loanButton);
+        panel.add(returnBookButton);
+        panel.add(myLoansButton);
+
+        add(panel, BorderLayout.SOUTH);
+    }
+
+    private JButton createStyledButton(String text, Color color) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Tahoma", Font.BOLD, 16));
+        button.setBackground(color);
+        button.setForeground(Color.BLACK);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(color.darker(), 2),
+            new EmptyBorder(8, 18, 8, 18)
+        ));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(color.darker());
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(color);
+            }
+        });
+        
+        return button;
+    }
+
+    private void setColumnSizes(JTable table, int[] widths) {
+        for (int i = 0; i < widths.length && i < table.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
+        }
+    }
+
+    private class ImageRenderer extends DefaultTableCellRenderer {
+        private static final int IMAGE_WIDTH = 40;
+        private static final int IMAGE_HEIGHT = 55;
+        
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            
+            JLabel label = (JLabel) super.getTableCellRendererComponent(
+                    table, "", isSelected, hasFocus, row, column);
+            
+            label.setHorizontalAlignment(SwingConstants.CENTER);
+            label.setText("");
+            
+            if (isSelected) {
+                label.setBackground(SELECTION_COLOR);
+                label.setForeground(SELECTION_TEXT_COLOR);
+            } else {
+                label.setBackground(row % 2 == 0 ? Color.WHITE : TABLE_ALTERNATE_COLOR);
+                label.setForeground(Color.BLACK);
+            }
+            
+            if (value instanceof ImageIcon) {
+                ImageIcon icon = (ImageIcon) value;
+                Image image = icon.getImage();
+                Image scaledImage = image.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_SMOOTH);
+                label.setIcon(new ImageIcon(scaledImage));
+            } else {
+                label.setIcon(null);
+            }
+            
+            return label;
+        }
+    }
+
+    private void loadBooks(List<Book> books) {
+
+        tableModel.setRowCount(0);
+
+        for (Book book : books) {
+
+            tableModel.addRow(new Object[]{
+                    loadCoverImage(book.getImagePath()),
+                    book.getIsbn(),
+                    book.getTitle(),
+                    book.getAuthor(),
+                    book.getCategory(),
+                    book.getAvailableCopies()
+            });
+
+        }
+
+    }
+
+    private ImageIcon loadCoverImage(String imagePath) {
+        if (imagePath == null || imagePath.trim().isEmpty()) {
+            return null;
+        }
+
+        File imageFile = new File("covers", imagePath);
+        if (!imageFile.exists()) {
+            return null;
+        }
+
+        try {
+            ImageIcon originalIcon = new ImageIcon(imageFile.getAbsolutePath());
+            Image scaledImage = originalIcon.getImage().getScaledInstance(40, 55, Image.SCALE_SMOOTH);
+            return new ImageIcon(scaledImage);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void searchBook() {
+
+        String keyword = searchField.getText().trim();
+
+        if (keyword.isEmpty()) {
+
+            loadBooks(bookService.getAllBooks());
+
+            return;
+        }
+
+        loadBooks(bookService.searchByTitle(keyword));
+    }
+    
+    private void reserveBook() {
+
+        Book book = getSelectedBook();
+
+        if (book == null) {
+            return;
+        }
+
+        try {
+
+            reservationService.createReservation(
+                    student,
+                    book,
+                    java.time.LocalDate.now()
+            );
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "درخواست رزرو با موفقیت ثبت شد."
+            );
+
+        } catch (Exception ex) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    ex.getMessage(),
+                    "خطا در رزرو",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+        }
+
+    }
+
+    private void extendLoan() {
+
+        Book book = getSelectedBook();
+
+        if (book == null) {
+            return;
+        }
+
+        try {
+
+            loanService.extendLoan(
+                    book.getIsbn(),
+                    student.getStudentId()
+            );
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "درخواست تمدید با موفقیت ثبت شد. در انتظار تأیید کتابدار."
+            );
+
+        } catch (IllegalStateException ex) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    ex.getMessage(),
+                    "خطا در تمدید",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+        } catch (Exception ex) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    ex.getMessage(),
+                    "خطا در تمدید",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+        }
+
+    }
+
+    private void loanBook() {
+
+        Book book = getSelectedBook();
+
+        if (book == null) {
+            return;
+        }
+
+        try {
+
+            loanService.borrowBook(
+                    student,
+                    book.getIsbn(),
+                    java.time.LocalDate.now()
+            );
+
+            loadBooks(bookService.getAllBooks());
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "کتاب با موفقیت امانت گرفته شد."
+            );
+
+        } catch (Exception ex) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    ex.getMessage(),
+                    "خطا در امانت",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+        }
+
+    }
+
+    private void returnBook() {
+
+        Book book = getSelectedBook();
+
+        if (book == null) {
+            return;
+        }
+
+        try {
+
+            loanService.returnBook(
+                    book.getIsbn(),
+                    student.getStudentId()
+            );
+
+            loadBooks(bookService.getAllBooks());
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "کتاب با موفقیت بازگردانده شد."
+            );
+
+        } catch (Exception ex) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    ex.getMessage(),
+                    "خطا در بازگشت کتاب",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+        }
+
+    }
+
+    private void showMyLoans() {
+
+        java.util.List<src.model.Loan> loans =
+                loanService.getActiveLoansByStudent(student);
+
+        if (loans.isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "شما هیچ کتاب امانتی ندارید."
+            );
+
+            return;
+        }
+
+        StringBuilder builder = new StringBuilder();
+
+        for (src.model.Loan loan : loans) {
+
+            builder.append("عنوان: ")
+                    .append(loan.getBook().getTitle())
+                    .append("\n");
+
+            builder.append("شابک: ")
+                    .append(loan.getBook().getIsbn())
+                    .append("\n");
+
+            builder.append("تاریخ امانت: ")
+                    .append(loan.getLoanDate())
+                    .append("\n");
+
+            builder.append("تاریخ بازگشت: ")
+                    .append(loan.getDueDate())
+                    .append("\n");
+
+            builder.append("تمدید شده: ")
+                    .append(loan.isExtended() ? "بله" : "خیر")
+                    .append("\n");
+
+            builder.append("----------------------------------\n");
+
+        }
+
+        JTextArea area = new JTextArea(builder.toString());
+        area.setEditable(false);
+        area.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        area.setForeground(Color.BLACK);
+        area.setBackground(Color.WHITE);
+
+        JScrollPane scrollPane = new JScrollPane(area);
+        scrollPane.setPreferredSize(new Dimension(450, 250));
+        scrollPane.setBorder(BorderFactory.createLineBorder(PRIMARY_COLOR, 2));
+
+        JOptionPane.showMessageDialog(
+                this,
+                scrollPane,
+                "کتاب‌های امانتی من",
+                JOptionPane.INFORMATION_MESSAGE
+        );
+
+    }
+
+    private Book getSelectedBook() {
+
+        int row = bookTable.getSelectedRow();
+
+        if (row == -1) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "لطفاً یک کتاب را انتخاب کنید."
+            );
+
+            return null;
+        }
+
+        String isbn = tableModel.getValueAt(row, 1).toString();
+
+        return bookService.findByIsbn(isbn);
+
+    }
+
+}
