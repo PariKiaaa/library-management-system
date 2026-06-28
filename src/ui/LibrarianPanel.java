@@ -22,9 +22,6 @@ import java.awt.*;
 import java.io.File;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class LibrarianPanel extends JFrame {
 
@@ -36,8 +33,6 @@ public class LibrarianPanel extends JFrame {
     private final BookService bookService;
     private final LoanService loanService;
     private final ReservationService reservationService;
-
-    private Timer autoRefreshTimer;
 
     private JTable booksTable;
     private DefaultTableModel booksTableModel;
@@ -60,6 +55,7 @@ public class LibrarianPanel extends JFrame {
     private JLabel totalBooksLabel;
     private JLabel availableBooksLabel;
     private JLabel borrowedBooksLabel;
+    private int dailyFine = 5000;
 
     // Colors
     private final Color PRIMARY_COLOR = new Color(255, 107, 107);
@@ -68,6 +64,8 @@ public class LibrarianPanel extends JFrame {
     private final Color BACKGROUND_COLOR = new Color(245, 247, 250);
     private final Color HEADER_COLOR = new Color(237, 180, 109);
     private final Color BUTTON_COLOR = new Color(52, 152, 219);
+    private final Color BUTTON_SAVE_MODE = new Color(92, 191, 102);
+    private final Color BUTTON_DRAFT_MODE = new Color(217, 102, 110);
     private final Color TABLE_ALTERNATE_COLOR = new Color(236, 240, 241);
     private final Color SELECTION_COLOR = new Color(52, 152, 219);
     private final Color SELECTION_TEXT_COLOR = Color.WHITE;
@@ -152,8 +150,6 @@ public class LibrarianPanel extends JFrame {
         headerPanel.add(headerLabel);
         
         add(headerPanel, BorderLayout.NORTH);
-
-        startAutoRefresh();
     }
 
     private JPanel createBooksTab() {
@@ -244,13 +240,15 @@ public class LibrarianPanel extends JFrame {
         bottomPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         bottomPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         
-JButton addButton = createStyledButton("افزودن کتاب", new Color(46, 204, 113));
+        JButton addButton = createStyledButton("افزودن کتاب", new Color(46, 204, 113));
         JButton editButton = createStyledButton("ویرایش کتاب", new Color(241, 196, 15));
         JButton deleteButton = createStyledButton("حذف کتاب", new Color(231, 76, 60));
-
+        JButton refreshButton = createStyledButton("بروزرسانی", new Color(52, 152, 219));
+        
         bottomPanel.add(addButton);
         bottomPanel.add(editButton);
         bottomPanel.add(deleteButton);
+        bottomPanel.add(refreshButton);
 
         panel.add(topPanel, BorderLayout.NORTH);
         panel.add(new JScrollPane(booksTable), BorderLayout.CENTER);
@@ -260,6 +258,14 @@ JButton addButton = createStyledButton("افزودن کتاب", new Color(46, 20
         addButton.addActionListener(e -> addBook());
         editButton.addActionListener(e -> editBook());
         deleteButton.addActionListener(e -> deleteBook());
+        refreshButton.addActionListener(e -> {
+            refreshAllData();
+            refreshBooksTable();
+            refreshReservationsTable();
+            refreshExtensionsTable();
+            refreshStudentsTable();
+            refreshReports();
+        });
 
         refreshBooksTable();
 
@@ -320,17 +326,23 @@ JButton addButton = createStyledButton("افزودن کتاب", new Color(46, 20
         buttonPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         buttonPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         
-JButton approveButton = createStyledButton("تأیید", new Color(46, 204, 113));
+        JButton approveButton = createStyledButton("تأیید", new Color(46, 204, 113));
         JButton rejectButton = createStyledButton("رد", new Color(231, 76, 60));
-
+        JButton refreshButton = createStyledButton("بروزرسانی", new Color(52, 152, 219));
+        
         buttonPanel.add(approveButton);
         buttonPanel.add(rejectButton);
+        buttonPanel.add(refreshButton);
 
         panel.add(new JScrollPane(reservationsTable), BorderLayout.CENTER);
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
         approveButton.addActionListener(e -> approveReservation());
         rejectButton.addActionListener(e -> rejectReservation());
+        refreshButton.addActionListener(e -> {
+            refreshAllData();
+            refreshReservationsTable();
+        });
 
         refreshReservationsTable();
 
@@ -391,14 +403,20 @@ JButton approveButton = createStyledButton("تأیید", new Color(46, 204, 113)
         buttonPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         buttonPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         
-JButton approveExtensionButton = createStyledButton("تأیید تمدید", new Color(46, 204, 113));
-
+        JButton approveExtensionButton = createStyledButton("تأیید تمدید", new Color(46, 204, 113));
+        JButton refreshButton = createStyledButton("بروزرسانی", new Color(52, 152, 219));
+        
         buttonPanel.add(approveExtensionButton);
+        buttonPanel.add(refreshButton);
 
         panel.add(new JScrollPane(extensionsTable), BorderLayout.CENTER);
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
         approveExtensionButton.addActionListener(e -> approveExtension());
+        refreshButton.addActionListener(e -> {
+            refreshAllData();
+            refreshExtensionsTable();
+        });
 
         refreshExtensionsTable();
 
@@ -454,6 +472,21 @@ JButton approveExtensionButton = createStyledButton("تأیید تمدید", new
         
         setColumnSizes(studentsTable, new int[]{100, 100, 100, 150, 120, 80});
 
+        JButton refreshButton = createStyledButton("بروزرسانی", new Color(52, 152, 219));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        buttonPanel.setBackground(BACKGROUND_COLOR);
+        buttonPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        buttonPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        buttonPanel.add(refreshButton);
+
+        panel.add(new JScrollPane(studentsTable), BorderLayout.CENTER);
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        refreshButton.addActionListener(e -> {
+            refreshAllData();
+            refreshStudentsTable();
+        });
+
         refreshStudentsTable();
 
         return panel;
@@ -476,10 +509,98 @@ JButton approveExtensionButton = createStyledButton("تأیید تمدید", new
         totalBooksLabel = createStyledLabel("تعداد کل کتاب‌ها: 0");
         availableBooksLabel = createStyledLabel("کتاب‌های موجود: 0");
         borrowedBooksLabel = createStyledLabel("کتاب‌های امانت داده شده: 0");
+        JLabel dailyFineLabel = createStyledLabel("جریمه روزانه: " );
+        JTextField dailyFineField = new JTextField(String.valueOf(dailyFine), 3);
+        dailyFineField.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        dailyFineField.setBackground(Color.WHITE);
+        dailyFineField.setForeground(Color.BLACK);
+        JButton updateFineButton = new JButton("ثبت");
+        updateFineButton.setFont(new Font("Tahoma", Font.BOLD, 16));
+        updateFineButton.setBackground(BUTTON_SAVE_MODE);
+        updateFineButton.setForeground(Color.BLACK);
+        updateFineButton.setFocusPainted(false);
+        updateFineButton.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(BUTTON_SAVE_MODE.darker(), 2),
+            new EmptyBorder(8, 18, 8, 18)
+        ));
+        updateFineButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        updateFineButton.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        updateFineButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (!dailyFineField.getText().equals(String.valueOf(dailyFine))) {
+                    updateFineButton.setBackground(BUTTON_DRAFT_MODE.darker());
+                } else {
+                    updateFineButton.setBackground(BUTTON_SAVE_MODE.darker());
+                }
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (!dailyFineField.getText().equals(String.valueOf(dailyFine))) {
+                    updateFineButton.setBackground(BUTTON_DRAFT_MODE);
+                } else {
+                    updateFineButton.setBackground(BUTTON_SAVE_MODE);
+                }
+            }
+        });
+        dailyFineField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            private void updateButtonState() {
+                String currentText = dailyFineField.getText();
+                if (!currentText.equals(String.valueOf(dailyFine))) {
+                    updateFineButton.setBackground(BUTTON_DRAFT_MODE);
+                    updateFineButton.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(BUTTON_DRAFT_MODE.darker(), 2),
+                        new EmptyBorder(8, 18, 8, 18)
+                    ));
+                } else {
+                    updateFineButton.setBackground(BUTTON_SAVE_MODE);
+                    updateFineButton.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(BUTTON_SAVE_MODE.darker(), 2),
+                        new EmptyBorder(8, 18, 8, 18)
+                    ));
+                }
+            }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { updateButtonState(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { updateButtonState(); }
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { updateButtonState(); }
+        });
+        updateFineButton.addActionListener(e -> {
+            try {
+                int newFine = Integer.parseInt(dailyFineField.getText().trim());
+                if (newFine <= 0) {
+                    JOptionPane.showMessageDialog(
+                            LibrarianPanel.this,
+                            "جریمه روزانه باید عددی مثبت باشد.",
+                            "خطا",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+                dailyFine = newFine;
+                // dailyFineLabel.setText("جریمه روزانه: " + dailyFine);
+                dailyFineField.setText(String.valueOf(dailyFine));
+                refreshReports();
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(
+                        LibrarianPanel.this,
+                        "لطفاً یک عدد معتبر وارد کنید.",
+                        "خطا",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+        });
         
         summaryPanel.add(totalBooksLabel);
         summaryPanel.add(availableBooksLabel);
         summaryPanel.add(borrowedBooksLabel);
+        summaryPanel.add(dailyFineLabel);
+        summaryPanel.add(dailyFineField);
+        summaryPanel.add(updateFineButton);
+
+        JButton refreshButton = createStyledButton("بروزرسانی", new Color(52, 152, 219));
+        refreshButton.addActionListener(e -> {
+            refreshAllData();
+            refreshReports();
+        });
+        summaryPanel.add(refreshButton);
 
         JPanel tablesPanel = new JPanel(new GridLayout(1, 2, 10, 10));
         tablesPanel.setBackground(BACKGROUND_COLOR);
@@ -808,13 +929,13 @@ JButton approveExtensionButton = createStyledButton("تأیید تمدید", new
         BookDialog dialog = new BookDialog(parent, book, bookService);
         dialog.setVisible(true);
 
-        if (dialog.isConfirmed()) {
-            refreshBooksTable();
-            JOptionPane.showMessageDialog(
-                    this,
-                    "کتاب با موفقیت به‌روزرسانی شد."
-            );
-        }
+        // if (dialog.isConfirmed()) {
+        //     refreshBooksTable();
+        //     JOptionPane.showMessageDialog(
+        //             this,
+        //             "کتاب با موفقیت به‌روزرسانی شد."
+        //     );
+        // }
     }
 
     private void deleteBook() {
@@ -1034,13 +1155,13 @@ JButton approveExtensionButton = createStyledButton("تأیید تمدید", new
     private int calculateDebt(Student student) {
         return (int) loanService.getActiveLoansByStudent(student).stream()
                 .filter(loan -> loan.isReturned() || loan.isOverdue())
-                .mapToInt(loan -> loan.calculateFine(1000))
+                .mapToInt(loan -> loan.calculateFine(dailyFine))
                 .sum();
     }
 
     private void refreshReports() {
         List<Book> allBooks = bookService.getAllBooks();
-        int totalBooks = allBooks.size();
+        int totalBooks = allBooks.stream().mapToInt(Book::getTotalCopies).sum();
         int availableBooks = allBooks.stream().mapToInt(Book::getAvailableCopies).sum();
         int borrowedBooks = allBooks.stream().mapToInt(b -> b.getTotalCopies() - b.getAvailableCopies()).sum();
 
@@ -1073,7 +1194,7 @@ JButton approveExtensionButton = createStyledButton("تأیید تمدید", new
         userRepository.getStudents().stream()
                 .filter(student -> {
                     long overdueCount = loanService.getActiveLoansByStudent(student).stream()
-                            .filter(loan -> loan.isOverdue() || loan.isReturned() && loan.calculateFine(1000) > 0)
+                                .filter(loan -> loan.isOverdue() || loan.isReturned() && loan.calculateFine(dailyFine) > 0)
                             .count();
                     return overdueCount > 0;
                 })
@@ -1081,22 +1202,9 @@ JButton approveExtensionButton = createStyledButton("تأیید تمدید", new
                         student.getFirstName() + " " + student.getLastName(),
                         student.getStudentId(),
                         loanService.getActiveLoansByStudent(student).stream()
-                                .filter(loan -> loan.isOverdue() || loan.isReturned() && loan.calculateFine(1000) > 0)
+                            .filter(loan -> loan.isOverdue() || loan.isReturned() && loan.calculateFine(dailyFine) > 0)
                                 .count(),
                         calculateDebt(student)
                 }));
-    }
-
-    private void startAutoRefresh() {
-        autoRefreshTimer = new Timer(7000, e -> {
-            refreshAllData();
-            refreshBooksTable();
-            refreshReservationsTable();
-            refreshExtensionsTable();
-            refreshStudentsTable();
-            refreshReports();
-        });
-        autoRefreshTimer.setRepeats(true);
-        autoRefreshTimer.start();
     }
 }

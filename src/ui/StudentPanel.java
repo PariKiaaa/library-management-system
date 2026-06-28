@@ -44,8 +44,7 @@ public class StudentPanel extends JFrame {
     private JButton reserveButton;
     private JButton extendButton;
     private JButton myLoansButton;
-
-    private Timer autoRefreshTimer;
+    private JButton refreshButton;
 
     // Colors
     private final Color PRIMARY_COLOR = new Color(255, 107, 107);

@@ -1,6 +1,6 @@
 package src.model;
 
-import java.io.Serializable;
+// import java.io.Serializable;
 import java.util.Objects;
 
 /**

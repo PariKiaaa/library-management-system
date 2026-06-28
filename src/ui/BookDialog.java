@@ -502,10 +502,10 @@ public class BookDialog extends JDialog {
             return false;
         }
 
-        if (year < 1900 || year > 2100) {
+        if (year < 1300 || year > 1405) {
             JOptionPane.showMessageDialog(
                     this,
-                    "سال انتشار باید بین 1900 تا 2100 باشد.",
+                    "سال انتشار باید بین 1300 تا 1405 باشد.",
                     "خطای اعتبارسنجی",
                     JOptionPane.ERROR_MESSAGE
             );
