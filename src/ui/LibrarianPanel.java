@@ -12,16 +12,19 @@ import src.repository.UserRepository;
 import src.service.BookService;
 import src.service.LoanService;
 import src.service.ReservationService;
-
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.io.File;
-import java.util.List;
-import java.util.ArrayList;
+// import java.io.File;
+// import java.util.List;
+// import java.util.ArrayList;
 
 public class LibrarianPanel extends JFrame {
 
@@ -492,236 +495,259 @@ public class LibrarianPanel extends JFrame {
         return panel;
     }
 
-    private JPanel createReportsTab() {
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setBackground(BACKGROUND_COLOR);
-        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
-        panel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+private JPanel createReportsTab() {
+    JPanel panel = new JPanel(new BorderLayout(10, 10));
+    panel.setBackground(BACKGROUND_COLOR);
+    panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+    panel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 
-        JPanel summaryPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        summaryPanel.setBackground(new Color(255, 255, 255, 200));
-        summaryPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(PRIMARY_COLOR, 2),
-            new EmptyBorder(10, 10, 10, 10)
-        ));
-        summaryPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-        
-        totalBooksLabel = createStyledLabel("تعداد کل کتاب‌ها: 0");
-        availableBooksLabel = createStyledLabel("کتاب‌های موجود: 0");
-        borrowedBooksLabel = createStyledLabel("کتاب‌های امانت داده شده: 0");
-        JLabel dailyFineLabel = createStyledLabel("جریمه روزانه: " );
-        JTextField dailyFineField = new JTextField(String.valueOf(dailyFine), 3);
-        dailyFineField.setFont(new Font("Tahoma", Font.PLAIN, 16));
-        dailyFineField.setBackground(Color.WHITE);
-        dailyFineField.setForeground(Color.BLACK);
-        JButton updateFineButton = new JButton("ثبت");
-        updateFineButton.setFont(new Font("Tahoma", Font.BOLD, 16));
-        updateFineButton.setBackground(BUTTON_SAVE_MODE);
-        updateFineButton.setForeground(Color.BLACK);
-        updateFineButton.setFocusPainted(false);
-        updateFineButton.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BUTTON_SAVE_MODE.darker(), 2),
-            new EmptyBorder(8, 18, 8, 18)
-        ));
-        updateFineButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        updateFineButton.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-        updateFineButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                if (!dailyFineField.getText().equals(String.valueOf(dailyFine))) {
-                    updateFineButton.setBackground(BUTTON_DRAFT_MODE.darker());
-                } else {
-                    updateFineButton.setBackground(BUTTON_SAVE_MODE.darker());
-                }
+    JPanel summaryPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+    summaryPanel.setBackground(new Color(255, 255, 255, 200));
+    summaryPanel.setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory.createLineBorder(PRIMARY_COLOR, 2),
+        new EmptyBorder(10, 10, 10, 10)
+    ));
+    summaryPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+    
+    totalBooksLabel = createStyledLabel("تعداد کل کتاب‌ها: 0");
+    availableBooksLabel = createStyledLabel("کتاب‌های موجود: 0");
+    borrowedBooksLabel = createStyledLabel("کتاب‌های امانت داده شده: 0");
+    JLabel dailyFineLabel = createStyledLabel("جریمه روزانه: ");
+    JTextField dailyFineField = new JTextField(String.valueOf(dailyFine), 3);
+    dailyFineField.setFont(new Font("Tahoma", Font.PLAIN, 16));
+    dailyFineField.setBackground(Color.WHITE);
+    dailyFineField.setForeground(Color.BLACK);
+    JButton updateFineButton = new JButton("ثبت");
+    updateFineButton.setFont(new Font("Tahoma", Font.BOLD, 16));
+    updateFineButton.setBackground(BUTTON_SAVE_MODE);
+    updateFineButton.setForeground(Color.BLACK);
+    updateFineButton.setFocusPainted(false);
+    updateFineButton.setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory.createLineBorder(BUTTON_SAVE_MODE.darker(), 2),
+        new EmptyBorder(8, 18, 8, 18)
+    ));
+    updateFineButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    updateFineButton.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+    updateFineButton.addMouseListener(new java.awt.event.MouseAdapter() {
+        public void mouseEntered(java.awt.event.MouseEvent evt) {
+            if (!dailyFineField.getText().equals(String.valueOf(dailyFine))) {
+                updateFineButton.setBackground(BUTTON_DRAFT_MODE.darker());
+            } else {
+                updateFineButton.setBackground(BUTTON_SAVE_MODE.darker());
             }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                if (!dailyFineField.getText().equals(String.valueOf(dailyFine))) {
-                    updateFineButton.setBackground(BUTTON_DRAFT_MODE);
-                } else {
-                    updateFineButton.setBackground(BUTTON_SAVE_MODE);
-                }
+        }
+        public void mouseExited(java.awt.event.MouseEvent evt) {
+            if (!dailyFineField.getText().equals(String.valueOf(dailyFine))) {
+                updateFineButton.setBackground(BUTTON_DRAFT_MODE);
+            } else {
+                updateFineButton.setBackground(BUTTON_SAVE_MODE);
             }
-        });
-        dailyFineField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            private void updateButtonState() {
-                String currentText = dailyFineField.getText();
-                if (!currentText.equals(String.valueOf(dailyFine))) {
-                    updateFineButton.setBackground(BUTTON_DRAFT_MODE);
-                    updateFineButton.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(BUTTON_DRAFT_MODE.darker(), 2),
-                        new EmptyBorder(8, 18, 8, 18)
-                    ));
-                } else {
-                    updateFineButton.setBackground(BUTTON_SAVE_MODE);
-                    updateFineButton.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(BUTTON_SAVE_MODE.darker(), 2),
-                        new EmptyBorder(8, 18, 8, 18)
-                    ));
-                }
+        }
+    });
+    dailyFineField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+        private void updateButtonState() {
+            String currentText = dailyFineField.getText();
+            if (!currentText.equals(String.valueOf(dailyFine))) {
+                updateFineButton.setBackground(BUTTON_DRAFT_MODE);
+                updateFineButton.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(BUTTON_DRAFT_MODE.darker(), 2),
+                    new EmptyBorder(8, 18, 8, 18)
+                ));
+            } else {
+                updateFineButton.setBackground(BUTTON_SAVE_MODE);
+                updateFineButton.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(BUTTON_SAVE_MODE.darker(), 2),
+                    new EmptyBorder(8, 18, 8, 18)
+                ));
             }
-            public void changedUpdate(javax.swing.event.DocumentEvent e) { updateButtonState(); }
-            public void removeUpdate(javax.swing.event.DocumentEvent e) { updateButtonState(); }
-            public void insertUpdate(javax.swing.event.DocumentEvent e) { updateButtonState(); }
-        });
-        updateFineButton.addActionListener(e -> {
-            try {
-                int newFine = Integer.parseInt(dailyFineField.getText().trim());
-                if (newFine <= 0) {
-                    JOptionPane.showMessageDialog(
-                            LibrarianPanel.this,
-                            "جریمه روزانه باید عددی مثبت باشد.",
-                            "خطا",
-                            JOptionPane.ERROR_MESSAGE
-                    );
-                    return;
-                }
-                dailyFine = newFine;
-                // dailyFineLabel.setText("جریمه روزانه: " + dailyFine);
-                dailyFineField.setText(String.valueOf(dailyFine));
-                refreshReports();
-            } catch (NumberFormatException ex) {
+        }
+        public void changedUpdate(javax.swing.event.DocumentEvent e) { updateButtonState(); }
+        public void removeUpdate(javax.swing.event.DocumentEvent e) { updateButtonState(); }
+        public void insertUpdate(javax.swing.event.DocumentEvent e) { updateButtonState(); }
+    });
+    updateFineButton.addActionListener(e -> {
+        try {
+            int newFine = Integer.parseInt(dailyFineField.getText().trim());
+            if (newFine <= 0) {
                 JOptionPane.showMessageDialog(
                         LibrarianPanel.this,
-                        "لطفاً یک عدد معتبر وارد کنید.",
+                        "جریمه روزانه باید عددی مثبت باشد.",
                         "خطا",
                         JOptionPane.ERROR_MESSAGE
                 );
+                return;
             }
-        });
-        
-        summaryPanel.add(totalBooksLabel);
-        summaryPanel.add(availableBooksLabel);
-        summaryPanel.add(borrowedBooksLabel);
-        summaryPanel.add(dailyFineLabel);
-        summaryPanel.add(dailyFineField);
-        summaryPanel.add(updateFineButton);
-
-        JButton refreshButton = createStyledButton("بروزرسانی", new Color(52, 152, 219));
-        refreshButton.addActionListener(e -> {
-            refreshAllData();
+            dailyFine = newFine;
+            dailyFineField.setText(String.valueOf(dailyFine));
             refreshReports();
-        });
-        summaryPanel.add(refreshButton);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(
+                    LibrarianPanel.this,
+                    "لطفاً یک عدد معتبر وارد کنید.",
+                    "خطا",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    });
+    
+    summaryPanel.add(totalBooksLabel);
+    summaryPanel.add(availableBooksLabel);
+    summaryPanel.add(borrowedBooksLabel);
+    summaryPanel.add(dailyFineLabel);
+    summaryPanel.add(dailyFineField);
+    summaryPanel.add(updateFineButton);
 
-        JPanel tablesPanel = new JPanel(new GridLayout(1, 2, 10, 10));
-        tablesPanel.setBackground(BACKGROUND_COLOR);
-        tablesPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-
-        JPanel borrowedPanel = new JPanel(new BorderLayout(5, 5));
-        borrowedPanel.setBackground(Color.WHITE);
-        borrowedPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(SECONDARY_COLOR, 2),
-            new EmptyBorder(10, 10, 10, 10)
-        ));
-        borrowedPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-        
-        JLabel borrowedTitle = new JLabel("پرطرفدارترین کتاب‌ها", JLabel.CENTER);
-        borrowedTitle.setFont(new Font("Tahoma", Font.BOLD, 18));
-        borrowedTitle.setForeground(Color.BLACK);
-        borrowedPanel.add(borrowedTitle, BorderLayout.NORTH);
-        
-        mostBorrowedTableModel = new DefaultTableModel(
-                new Object[]{"عنوان", "نویسنده", "تعداد امانت"}, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-        mostBorrowedTable = new JTable(mostBorrowedTableModel);
-        mostBorrowedTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-        mostBorrowedTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        mostBorrowedTable.setRowHeight(35);
-        mostBorrowedTable.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        mostBorrowedTable.setBackground(Color.WHITE);
-        mostBorrowedTable.setForeground(Color.BLACK);
-        mostBorrowedTable.setGridColor(new Color(236, 240, 241));
-        mostBorrowedTable.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-        mostBorrowedTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                setHorizontalAlignment(SwingConstants.RIGHT);
-                if (isSelected) {
-                    c.setBackground(SELECTION_COLOR);
-                    c.setForeground(SELECTION_TEXT_COLOR);
-                } else {
-                    c.setBackground(row % 2 == 0 ? Color.WHITE : TABLE_ALTERNATE_COLOR);
-                    c.setForeground(Color.BLACK);
-                }
-                return c;
-            }
-        });
-        JTableHeader mHeader = mostBorrowedTable.getTableHeader();
-        mHeader.setBackground(HEADER_COLOR);
-        mHeader.setForeground(Color.BLACK);
-        mHeader.setFont(new Font("Tahoma", Font.BOLD, 15));
-        mHeader.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-        ((DefaultTableCellRenderer)mHeader.getDefaultRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
-        setColumnSizes(mostBorrowedTable, new int[]{150, 120, 80});
-        borrowedPanel.add(new JScrollPane(mostBorrowedTable), BorderLayout.CENTER);
-
-        JPanel overduePanel = new JPanel(new BorderLayout(5, 5));
-        overduePanel.setBackground(Color.WHITE);
-        overduePanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(PRIMARY_COLOR, 2),
-            new EmptyBorder(10, 10, 10, 10)
-        ));
-        overduePanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-        
-        JLabel overdueTitle = new JLabel("دانشجویان دارای دیرکرد", JLabel.CENTER);
-        overdueTitle.setFont(new Font("Tahoma", Font.BOLD, 18));
-        overdueTitle.setForeground(Color.BLACK);
-        overduePanel.add(overdueTitle, BorderLayout.NORTH);
-        
-        overdueStudentsTableModel = new DefaultTableModel(
-                new Object[]{"نام دانشجو", "شماره دانشجویی", "تعداد دیرکردها", "مجموع بدهی"}, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-        overdueStudentsTable = new JTable(overdueStudentsTableModel);
-        overdueStudentsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-        overdueStudentsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        overdueStudentsTable.setRowHeight(35);
-        overdueStudentsTable.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        overdueStudentsTable.setBackground(Color.WHITE);
-        overdueStudentsTable.setForeground(Color.BLACK);
-        overdueStudentsTable.setGridColor(new Color(236, 240, 241));
-        overdueStudentsTable.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-        overdueStudentsTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                setHorizontalAlignment(SwingConstants.RIGHT);
-                if (isSelected) {
-                    c.setBackground(SELECTION_COLOR);
-                    c.setForeground(SELECTION_TEXT_COLOR);
-                } else {
-                    c.setBackground(row % 2 == 0 ? Color.WHITE : TABLE_ALTERNATE_COLOR);
-                    c.setForeground(Color.BLACK);
-                }
-                return c;
-            }
-        });
-        JTableHeader oHeader = overdueStudentsTable.getTableHeader();
-        oHeader.setBackground(HEADER_COLOR);
-        oHeader.setForeground(Color.BLACK);
-        oHeader.setFont(new Font("Tahoma", Font.BOLD, 15));
-        oHeader.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-        ((DefaultTableCellRenderer)oHeader.getDefaultRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
-        setColumnSizes(overdueStudentsTable, new int[]{120, 100, 90, 80});
-        overduePanel.add(new JScrollPane(overdueStudentsTable), BorderLayout.CENTER);
-
-        tablesPanel.add(borrowedPanel);
-        tablesPanel.add(overduePanel);
-
-        panel.add(summaryPanel, BorderLayout.NORTH);
-        panel.add(tablesPanel, BorderLayout.CENTER);
-
+    JButton refreshButton = createStyledButton("بروزرسانی", new Color(52, 152, 219));
+    refreshButton.addActionListener(e -> {
+        refreshAllData();
         refreshReports();
+    });
+    summaryPanel.add(refreshButton);
 
-        return panel;
-    }
+    JPanel tablesPanel = new JPanel(new GridLayout(1, 2, 10, 10));
+    tablesPanel.setBackground(BACKGROUND_COLOR);
+    tablesPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+
+    // ===== پنل کتاب‌های پرطرفدار =====
+    JPanel borrowedPanel = new JPanel(new BorderLayout(5, 5));
+    borrowedPanel.setBackground(Color.WHITE);
+    borrowedPanel.setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory.createLineBorder(SECONDARY_COLOR, 2),
+        new EmptyBorder(10, 10, 10, 10)
+    ));
+    borrowedPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+    
+    JPanel borrowedHeaderPanel = new JPanel(new BorderLayout(5, 5));
+    borrowedHeaderPanel.setBackground(Color.WHITE);
+    borrowedHeaderPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+    
+    JLabel borrowedTitle = new JLabel("پرطرفدارترین کتاب‌ها", JLabel.CENTER);
+    borrowedTitle.setFont(new Font("Tahoma", Font.BOLD, 18));
+    borrowedTitle.setForeground(Color.BLACK);
+    borrowedHeaderPanel.add(borrowedTitle, BorderLayout.CENTER);
+    
+    JButton exportBorrowedCsvButton = createStyledButton("خروجی CSV", new Color(52, 152, 219));
+    exportBorrowedCsvButton.setFont(new Font("Tahoma", Font.BOLD, 14));
+    exportBorrowedCsvButton.addActionListener(e -> exportMostBorrowedToCsv());
+    borrowedHeaderPanel.add(exportBorrowedCsvButton, BorderLayout.EAST);
+    
+    borrowedPanel.add(borrowedHeaderPanel, BorderLayout.NORTH);
+    
+    mostBorrowedTableModel = new DefaultTableModel(
+            new Object[]{"عنوان", "نویسنده", "تعداد امانت"}, 0) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
+    mostBorrowedTable = new JTable(mostBorrowedTableModel);
+    mostBorrowedTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+    mostBorrowedTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    mostBorrowedTable.setRowHeight(35);
+    mostBorrowedTable.setFont(new Font("Tahoma", Font.PLAIN, 14));
+    mostBorrowedTable.setBackground(Color.WHITE);
+    mostBorrowedTable.setForeground(Color.BLACK);
+    mostBorrowedTable.setGridColor(new Color(236, 240, 241));
+    mostBorrowedTable.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+    mostBorrowedTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            setHorizontalAlignment(SwingConstants.RIGHT);
+            if (isSelected) {
+                c.setBackground(SELECTION_COLOR);
+                c.setForeground(SELECTION_TEXT_COLOR);
+            } else {
+                c.setBackground(row % 2 == 0 ? Color.WHITE : TABLE_ALTERNATE_COLOR);
+                c.setForeground(Color.BLACK);
+            }
+            return c;
+        }
+    });
+    JTableHeader mHeader = mostBorrowedTable.getTableHeader();
+    mHeader.setBackground(HEADER_COLOR);
+    mHeader.setForeground(Color.BLACK);
+    mHeader.setFont(new Font("Tahoma", Font.BOLD, 15));
+    mHeader.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+    ((DefaultTableCellRenderer)mHeader.getDefaultRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
+    setColumnSizes(mostBorrowedTable, new int[]{150, 120, 80});
+    borrowedPanel.add(new JScrollPane(mostBorrowedTable), BorderLayout.CENTER);
+
+    // ===== پنل دانشجویان دارای دیرکرد =====
+    JPanel overduePanel = new JPanel(new BorderLayout(5, 5));
+    overduePanel.setBackground(Color.WHITE);
+    overduePanel.setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory.createLineBorder(PRIMARY_COLOR, 2),
+        new EmptyBorder(10, 10, 10, 10)
+    ));
+    overduePanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+    
+    JPanel overdueHeaderPanel = new JPanel(new BorderLayout(5, 5));
+    overdueHeaderPanel.setBackground(Color.WHITE);
+    overdueHeaderPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+    
+    JLabel overdueTitle = new JLabel("دانشجویان دارای دیرکرد", JLabel.CENTER);
+    overdueTitle.setFont(new Font("Tahoma", Font.BOLD, 18));
+    overdueTitle.setForeground(Color.BLACK);
+    overdueHeaderPanel.add(overdueTitle, BorderLayout.CENTER);
+    
+    JButton exportOverdueCsvButton = createStyledButton("خروجی CSV", new Color(52, 152, 219));
+    exportOverdueCsvButton.setFont(new Font("Tahoma", Font.BOLD, 14));
+    exportOverdueCsvButton.addActionListener(e -> exportOverdueStudentsToCsv());
+    overdueHeaderPanel.add(exportOverdueCsvButton, BorderLayout.EAST);
+    
+    overduePanel.add(overdueHeaderPanel, BorderLayout.NORTH);
+    
+    overdueStudentsTableModel = new DefaultTableModel(
+            new Object[]{"نام دانشجو", "شماره دانشجویی", "تعداد دیرکردها", "مجموع بدهی"}, 0) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
+    overdueStudentsTable = new JTable(overdueStudentsTableModel);
+    overdueStudentsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+    overdueStudentsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    overdueStudentsTable.setRowHeight(35);
+    overdueStudentsTable.setFont(new Font("Tahoma", Font.PLAIN, 14));
+    overdueStudentsTable.setBackground(Color.WHITE);
+    overdueStudentsTable.setForeground(Color.BLACK);
+    overdueStudentsTable.setGridColor(new Color(236, 240, 241));
+    overdueStudentsTable.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+    overdueStudentsTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            setHorizontalAlignment(SwingConstants.RIGHT);
+            if (isSelected) {
+                c.setBackground(SELECTION_COLOR);
+                c.setForeground(SELECTION_TEXT_COLOR);
+            } else {
+                c.setBackground(row % 2 == 0 ? Color.WHITE : TABLE_ALTERNATE_COLOR);
+                c.setForeground(Color.BLACK);
+            }
+            return c;
+        }
+    });
+    JTableHeader oHeader = overdueStudentsTable.getTableHeader();
+    oHeader.setBackground(HEADER_COLOR);
+    oHeader.setForeground(Color.BLACK);
+    oHeader.setFont(new Font("Tahoma", Font.BOLD, 15));
+    oHeader.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+    ((DefaultTableCellRenderer)oHeader.getDefaultRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
+    setColumnSizes(overdueStudentsTable, new int[]{120, 100, 90, 80});
+    overduePanel.add(new JScrollPane(overdueStudentsTable), BorderLayout.CENTER);
+
+    tablesPanel.add(borrowedPanel);
+    tablesPanel.add(overduePanel);
+
+    panel.add(summaryPanel, BorderLayout.NORTH);
+    panel.add(tablesPanel, BorderLayout.CENTER);
+
+    refreshReports();
+
+    return panel;
+}
 
     private JButton createStyledButton(String text, Color color) {
         JButton button = new JButton(text);
@@ -1207,4 +1233,132 @@ public class LibrarianPanel extends JFrame {
                         calculateDebt(student)
                 }));
     }
+
+// ===== متدهای خروجی CSV =====
+
+private void exportMostBorrowedToCsv() {
+    try {
+        // انتخاب مسیر ذخیره فایل
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("ذخیره گزارش کتاب‌های پرطرفدار");
+        fileChooser.setSelectedFile(new File("پرطرفدارترین_کتاب‌ها.csv"));
+        
+        int result = fileChooser.showSaveDialog(this);
+        if (result != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+        
+        String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+        if (!filePath.endsWith(".csv")) {
+            filePath += ".csv";
+        }
+        
+        // دریافت داده‌ها از جدول
+        List<String[]> data = new ArrayList<>();
+        
+        // اضافه کردن سرستون‌ها
+        data.add(new String[]{"عنوان کتاب", "نویسنده", "تعداد امانت"});
+        
+        // اضافه کردن ردیف‌های داده
+        for (int i = 0; i < mostBorrowedTableModel.getRowCount(); i++) {
+            String title = mostBorrowedTableModel.getValueAt(i, 0).toString();
+            String author = mostBorrowedTableModel.getValueAt(i, 1).toString();
+            String borrowCount = mostBorrowedTableModel.getValueAt(i, 2).toString();
+            data.add(new String[]{title, author, borrowCount});
+        }
+        
+        // نوشتن فایل CSV
+        writeCsvFile(filePath, data);
+        
+        JOptionPane.showMessageDialog(
+            this,
+            "گزارش با موفقیت در مسیر زیر ذخیره شد:\n" + filePath,
+            "موفقیت",
+            JOptionPane.INFORMATION_MESSAGE
+        );
+        
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(
+            this,
+            "خطا در ذخیره فایل: " + ex.getMessage(),
+            "خطا",
+            JOptionPane.ERROR_MESSAGE
+        );
+    }
+}
+
+private void exportOverdueStudentsToCsv() {
+    try {
+        // انتخاب مسیر ذخیره فایل
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("ذخیره گزارش دانشجویان دارای دیرکرد");
+        fileChooser.setSelectedFile(new File("دانشجویان_دارای_دیرکرد.csv"));
+        
+        int result = fileChooser.showSaveDialog(this);
+        if (result != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+        
+        String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+        if (!filePath.endsWith(".csv")) {
+            filePath += ".csv";
+        }
+        
+        // دریافت داده‌ها از جدول
+        List<String[]> data = new ArrayList<>();
+        
+        // اضافه کردن سرستون‌ها
+        data.add(new String[]{"نام دانشجو", "شماره دانشجویی", "تعداد دیرکردها", "مجموع بدهی (ریال)"});
+        
+        // اضافه کردن ردیف‌های داده
+        for (int i = 0; i < overdueStudentsTableModel.getRowCount(); i++) {
+            String name = overdueStudentsTableModel.getValueAt(i, 0).toString();
+            String studentId = overdueStudentsTableModel.getValueAt(i, 1).toString();
+            String overdueCount = overdueStudentsTableModel.getValueAt(i, 2).toString();
+            String debt = overdueStudentsTableModel.getValueAt(i, 3).toString();
+            data.add(new String[]{name, studentId, overdueCount, debt});
+        }
+        
+        // نوشتن فایل CSV
+        writeCsvFile(filePath, data);
+        
+        JOptionPane.showMessageDialog(
+            this,
+            "گزارش با موفقیت در مسیر زیر ذخیره شد:\n" + filePath,
+            "موفقیت",
+            JOptionPane.INFORMATION_MESSAGE
+        );
+        
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(
+            this,
+            "خطا در ذخیره فایل: " + ex.getMessage(),
+            "خطا",
+            JOptionPane.ERROR_MESSAGE
+        );
+    }
+}
+
+private void writeCsvFile(String filePath, List<String[]> data) throws IOException {
+    try (java.io.PrintWriter writer = new java.io.PrintWriter(
+            new java.io.OutputStreamWriter(new java.io.FileOutputStream(filePath), "UTF-8"))) {
+        
+        for (String[] row : data) {
+            // جایگزینی کاما با ویرگول برای جلوگیری از مشکلات CSV
+            String[] escapedRow = new String[row.length];
+            for (int i = 0; i < row.length; i++) {
+                // اگر مقدار شامل کاما یا نقل قول باشه، داخل نقل قول قرار می‌دیم
+                String value = row[i];
+                if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
+                    value = value.replace("\"", "\"\"");
+                    value = "\"" + value + "\"";
+                }
+                escapedRow[i] = value;
+            }
+            writer.println(String.join(",", escapedRow));
+        }
+        
+        writer.flush();
+    }
+}
 }

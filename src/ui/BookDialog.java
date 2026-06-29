@@ -74,7 +74,7 @@ public class BookDialog extends JDialog {
             UIManager.put("control", BACKGROUND_COLOR);
             
             Font defaultFont = new Font("Tahoma", Font.PLAIN, 18);
-            Font boldFont = new Font("Tahoma", Font.BOLD, 18);
+            // Font boldFont = new Font("Tahoma", Font.BOLD, 18);
             
             UIManager.put("Button.font", defaultFont);
             UIManager.put("Label.font", defaultFont);
@@ -363,34 +363,32 @@ public class BookDialog extends JDialog {
         return button;
     }
 
-    // دکمه جستجوی تصویر در گوگل
-    private JButton createGoogleSearchButton() {
-        JButton googleButton = new JButton("جستجوی تصویر در گوگل");
-        googleButton.setFont(new Font("Tahoma", Font.BOLD, 14));
-        googleButton.setBackground(new Color(66, 133, 244));
-        googleButton.setForeground(Color.WHITE);
-        googleButton.setFocusPainted(false);
-        googleButton.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(66, 133, 244).darker(), 2),
-            new EmptyBorder(8, 15, 8, 15)
-        ));
-        googleButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        googleButton.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-        
-        googleButton.addActionListener(e -> searchImageOnGoogle());
-        
-        googleButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                googleButton.setBackground(new Color(52, 120, 230));
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                googleButton.setBackground(new Color(66, 133, 244));
-            }
-        });
-        
-        return googleButton;
-    }
-
+private JButton createGoogleSearchButton() {
+    JButton googleButton = new JButton("جستجوی خودکار");
+    googleButton.setFont(new Font("Tahoma", Font.BOLD, 18)); 
+    googleButton.setBackground(new Color(211, 108, 240));
+    googleButton.setForeground(Color.BLACK);
+    googleButton.setFocusPainted(false);
+    googleButton.setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory.createLineBorder(new Color(211, 108, 240).darker(), 2),
+        new EmptyBorder(10, 25, 10, 25) 
+    ));
+    googleButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    googleButton.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+    
+    googleButton.addActionListener(e -> searchImageOnGoogle());
+    
+    googleButton.addMouseListener(new java.awt.event.MouseAdapter() {
+        public void mouseEntered(java.awt.event.MouseEvent evt) {
+            googleButton.setBackground(new Color(211, 108, 240).darker());
+        }
+        public void mouseExited(java.awt.event.MouseEvent evt) {
+            googleButton.setBackground(new Color(211, 108, 240));
+        }
+    });
+    
+    return googleButton;
+}
     // متد جستجوی تصویر در گوگل
     private void searchImageOnGoogle() {
         String bookTitle = titleField.getText().trim();
