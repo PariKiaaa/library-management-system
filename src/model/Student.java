@@ -38,11 +38,11 @@ public class Student extends User {
 
     @Override
     public String toString() {
-        return "Student{" +
-                "firstName='" + getFirstName() + '\'' +
-                ", lastName='" + getLastName() + '\'' +
-                ", email='" + getEmail() + '\'' +
-                ", studentId='" + studentId + '\'' +
+        return "دانشجو{" +
+                "نام='" + getFirstName() + '\'' +
+                "، نام خانوادگی='" + getLastName() + '\'' +
+                "، ایمیل='" + getEmail() + '\'' +
+                "، شماره دانشجویی='" + studentId + '\'' +
                 '}';
     }
 }

@@ -52,7 +52,7 @@ public class Loan implements Serializable {
       */
     public void extend() {
         if (extended) {
-            throw new IllegalStateException("This loan has already been extended");
+            throw new IllegalStateException("این امانت قبلاً تمدید شده است");
         }
         this.extensionRequested = true;
     }
@@ -63,7 +63,7 @@ public class Loan implements Serializable {
       */
     public void approveExtension() {
         if (!extensionRequested) {
-            throw new IllegalStateException("No extension request pending");
+            throw new IllegalStateException("درخواست تمدیدی در انتظار نیست");
         }
         this.extended = true;
         this.extensionRequested = false;
@@ -76,7 +76,7 @@ public class Loan implements Serializable {
      */
     public void returnBook() {
         if (actualReturnDate != null) {
-            throw new IllegalStateException("Book already returned");
+            throw new IllegalStateException("کتاب قبلاً بازگردانده شده است");
         }
         this.actualReturnDate = LocalDate.now();
         // Increase available copies
@@ -105,7 +105,7 @@ public class Loan implements Serializable {
      */
     public int calculateFine(int dailyFine) {
         if (dailyFine <= 0) {
-            throw new IllegalArgumentException("Daily fine must be positive");
+            throw new IllegalArgumentException("جریمه روزانه باید مثبت باشد");
         }
         
         if (!isReturned()) {
@@ -118,14 +118,14 @@ public class Loan implements Serializable {
 
     @Override
     public String toString() {
-        return "Loan{" +
-                "student=" + Objects.toString(student != null ? student.getStudentId() : "null") +
-                ", book=" + Objects.toString(book != null ? book.getTitle() : "null") +
-                ", loanDate=" + loanDate +
-                ", dueDate=" + dueDate +
-                ", actualReturnDate=" + actualReturnDate +
-                ", extended=" + extended +
-                ", extensionDate=" + extensionDate +
+        return "امانت{" +
+                "دانشجو=" + Objects.toString(student != null ? student.getStudentId() : "null") +
+                "، کتاب=" + Objects.toString(book != null ? book.getTitle() : "null") +
+                "، تاریخ امانت=" + loanDate +
+                "، تاریخ بازگشت=" + dueDate +
+                "، تاریخ بازگشت واقعی=" + actualReturnDate +
+                "، تمدید شده=" + extended +
+                "، تاریخ تمدید=" + extensionDate +
                 '}';
     }
 }

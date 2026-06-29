@@ -111,16 +111,16 @@ public class Book implements Serializable {
 
     @Override
     public String toString() {
-        return "Book{" +
-                "isbn='" + isbn + '\'' +
-                ", title='" + title + '\'' +
-                ", author='" + author + '\'' +
-                ", publisher='" + publisher + '\'' +
-                ", year=" + year +
-                ", category='" + category + '\'' +
-                ", totalCopies=" + totalCopies +
-                ", availableCopies=" + availableCopies +
-                ", imagePath='" + imagePath + '\'' +
+        return "کتاب{" +
+                "شابک='" + isbn + '\'' +
+                "، عنوان='" + title + '\'' +
+                "، نویسنده='" + author + '\'' +
+                "، ناشر='" + publisher + '\'' +
+                "، سال=" + year +
+                "، دسته‌بندی='" + category + '\'' +
+                "، تعداد کل=" + totalCopies +
+                "، تعداد موجود=" + availableCopies +
+                "، مسیر تصویر='" + imagePath + '\'' +
                 '}';
     }
 }

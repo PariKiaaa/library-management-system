@@ -31,17 +31,17 @@ public class LoanService {
 
         Book book = bookRepository.findByIsbn(isbn);
         if (book == null) {
-            throw new ValidationException("Book not found.");
+            throw new ValidationException("کتاب یافت نشد.");
         }
 
         if (book.getAvailableCopies() <= 0) {
-            throw new BookNotAvailableException("No available copies for this book.");
+            throw new BookNotAvailableException("نسخه‌ای از این کتاب موجود نیست.");
         }
 
         List<Loan> activeLoans = loanRepository.getLoansByStudent(student);
         for (Loan loan : activeLoans) {
             if (loan.getBook().getIsbn().equals(isbn)) {
-                throw new ValidationException("You already have an active loan for this book.");
+                throw new ValidationException("شما قبلاً این کتاب را امانت گرفته‌اید.");
             }
         }
 
@@ -55,24 +55,33 @@ public class LoanService {
 
     public void returnBook(String isbn, String studentId) throws ValidationException {
         if (isbn == null || isbn.trim().isEmpty()) {
-            throw new ValidationException("ISBN cannot be empty.");
+            throw new ValidationException("شابک نمی‌تواند خالی باشد.");
         }
         if (studentId == null || studentId.trim().isEmpty()) {
-            throw new ValidationException("Student ID cannot be empty.");
+            throw new ValidationException("شماره دانشجویی نمی‌تواند خالی باشد.");
         }
 
         Loan loan = findActiveLoan(isbn, studentId);
         loan.returnBook();
+        Book book = bookRepository.findByIsbn(isbn);
+        book.setAvailableCopies(book.getAvailableCopies() + 1);
         loanRepository.save();
         bookRepository.save();
+        ReservationService reservationService = new ReservationService();
+
+        try {
+            reservationService.processApprovedReservation(loan.getBook(), true);
+        } catch (Exception e) {
+            // e.printStackTrace();
+        }
     }
 
     public void extendLoan(String isbn, String studentId) throws ValidationException {
         if (isbn == null || isbn.trim().isEmpty()) {
-            throw new ValidationException("ISBN cannot be empty.");
+            throw new ValidationException("شابک نمی‌تواند خالی باشد.");
         }
         if (studentId == null || studentId.trim().isEmpty()) {
-            throw new ValidationException("Student ID cannot be empty.");
+            throw new ValidationException("شماره دانشجویی نمی‌تواند خالی باشد.");
         }
 
         Loan loan = findActiveLoan(isbn, studentId);
@@ -82,10 +91,10 @@ public class LoanService {
 
     public void approveExtension(String isbn, String studentId) throws ValidationException {
         if (isbn == null || isbn.trim().isEmpty()) {
-            throw new ValidationException("ISBN cannot be empty.");
+            throw new ValidationException("شابک نمی‌تواند خالی باشد.");
         }
         if (studentId == null || studentId.trim().isEmpty()) {
-            throw new ValidationException("Student ID cannot be empty.");
+            throw new ValidationException("شماره دانشجویی نمی‌تواند خالی باشد.");
         }
 
         Loan loan = findActiveLoan(isbn, studentId);
@@ -101,13 +110,13 @@ public class LoanService {
 
     public int calculateFine(String isbn, String studentId, int dailyFine) throws ValidationException {
         if (isbn == null || isbn.trim().isEmpty()) {
-            throw new ValidationException("ISBN cannot be empty.");
+            throw new ValidationException("شابک نمی‌تواند خالی باشد.");
         }
         if (studentId == null || studentId.trim().isEmpty()) {
-            throw new ValidationException("Student ID cannot be empty.");
+            throw new ValidationException("شماره دانشجویی نمی‌تواند خالی باشد.");
         }
         if (dailyFine <= 0) {
-            throw new ValidationException("Daily fine must be positive.");
+            throw new ValidationException("جریمه روزانه باید مثبت باشد.");
         }
 
         Loan loan = findActiveLoan(isbn, studentId);
@@ -134,18 +143,18 @@ public class LoanService {
                 return loan;
             }
         }
-        throw new ValidationException("Active loan not found.");
+        throw new ValidationException("امانت فعال یافت نشد.");
     }
 
     private void validateBorrowInput(Student student, String isbn, LocalDate loanDate) throws ValidationException {
         if (student == null) {
-            throw new ValidationException("Student cannot be null.");
+            throw new ValidationException("دانشجو نمی‌تواند خالی باشد.");
         }
         if (isbn == null || isbn.trim().isEmpty()) {
-            throw new ValidationException("ISBN cannot be empty.");
+            throw new ValidationException("شابک نمی‌تواند خالی باشد.");
         }
         if (loanDate == null) {
-            throw new ValidationException("Loan date cannot be null.");
+            throw new ValidationException("تاریخ امانت نمی‌تواند خالی باشد.");
         }
     }
 }

@@ -30,19 +30,19 @@ public class AuthenticationService {
             throws ValidationException, DuplicateUserException {
 
         if (!ValidationUtil.isValidStudentId(student.getStudentId())) {
-            throw new ValidationException("Invalid student ID.");
+            throw new ValidationException("شماره دانشجویی نامعتبر است.");
         }
 
         if (!ValidationUtil.isValidEmail(student.getEmail())) {
-            throw new ValidationException("Invalid email.");
+            throw new ValidationException("ایمیل نامعتبر است.");
         }
 
         if (!ValidationUtil.isValidPassword(student.getPassword())) {
-            throw new ValidationException("Invalid password.");
+            throw new ValidationException("رمز عبور نامعتبر است.");
         }
 
         if (userRepository.findStudent(student.getStudentId()) != null) {
-            throw new DuplicateUserException("Student ID already exists.");
+            throw new DuplicateUserException("شماره دانشجویی قبلاً ثبت شده است.");
         }
 
         userRepository.addStudent(student);
@@ -59,15 +59,15 @@ public class AuthenticationService {
             throws ValidationException, DuplicateUserException {
 
         if (!ValidationUtil.isValidEmail(librarian.getEmail())) {
-            throw new ValidationException("Invalid email.");
+            throw new ValidationException("ایمیل نامعتبر است.");
         }
 
         if (!ValidationUtil.isValidPassword(librarian.getPassword())) {
-            throw new ValidationException("Invalid password.");
+            throw new ValidationException("رمز عبور نامعتبر است.");
         }
 
         if (userRepository.findLibrarian(librarian.getPersonnelCode()) != null) {
-            throw new DuplicateUserException("Personnel code already exists.");
+            throw new DuplicateUserException("کد پرسنلی قبلاً ثبت شده است.");
         }
 
         userRepository.addLibrarian(librarian);
@@ -87,11 +87,11 @@ public class AuthenticationService {
         Student student = userRepository.findStudent(studentId);
 
         if (student == null) {
-            throw new AuthenticationException("Student not found.");
+            throw new AuthenticationException("دانشجو یافت نشد.");
         }
 
         if (!student.getPassword().equals(password)) {
-            throw new AuthenticationException("Incorrect password.");
+            throw new AuthenticationException("رمز عبور اشتباه است.");
         }
 
         return student;
@@ -111,11 +111,11 @@ public class AuthenticationService {
         Librarian librarian = userRepository.findLibrarian(personnelCode);
 
         if (librarian == null) {
-            throw new AuthenticationException("Librarian not found.");
+            throw new AuthenticationException("کتابدار یافت نشد.");
         }
 
         if (!librarian.getPassword().equals(password)) {
-            throw new AuthenticationException("Incorrect password.");
+            throw new AuthenticationException("رمز عبور اشتباه است.");
         }
 
         return librarian;

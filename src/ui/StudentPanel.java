@@ -77,7 +77,7 @@ public class StudentPanel extends JFrame {
         initializeTable();
         initializeTopPanel();
         initializeBottomPanel();
-
+        // System.out.println(bookRepository.findByIsbn(isbn).getAvailableCopies());
         loadBooks(bookService.getAllBooks());
     }
 
@@ -137,7 +137,7 @@ public class StudentPanel extends JFrame {
         tableModel = new DefaultTableModel(
                 new Object[]{
                         "تصویر",
-                        "ISBN",
+                        "شابک",
                         "عنوان",
                         "نویسنده",
                         "دسته‌بندی",

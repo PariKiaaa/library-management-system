@@ -16,15 +16,15 @@ public class BookService {
 
     public void addBook(Book book) throws ValidationException {
         if (book == null) {
-            throw new ValidationException("Book cannot be null.");
+            throw new ValidationException("کتاب نمی‌تواند خالی باشد.");
         }
 
         if (book.getIsbn() == null || book.getIsbn().trim().isEmpty()) {
-            throw new ValidationException("ISBN cannot be empty.");
+            throw new ValidationException("شابک نمی‌تواند خالی باشد.");
         }
 
         if (bookRepository.findByIsbn(book.getIsbn()) != null) {
-            throw new ValidationException("A book with this ISBN already exists.");
+            throw new ValidationException("کتابی با این شابک قبلاً وجود دارد.");
         }
 
         validateBookFields(book);
@@ -37,12 +37,12 @@ public class BookService {
 
     public void editBook(String isbn, Book updatedBook) throws ValidationException {
         if (isbn == null || isbn.trim().isEmpty()) {
-            throw new ValidationException("ISBN cannot be empty.");
+            throw new ValidationException("شابک نمی‌تواند خالی باشد.");
         }
 
         Book existingBook = bookRepository.findByIsbn(isbn);
         if (existingBook == null) {
-            throw new ValidationException("Book not found.");
+            throw new ValidationException("کتاب یافت نشد.");
         }
 
         validateBookFields(updatedBook);
@@ -57,16 +57,24 @@ public class BookService {
         existingBook.setImagePath(updatedBook.getImagePath());
 
         bookRepository.save();
+        ReservationService reservationService =
+                new ReservationService();
+        try{
+        reservationService.processApprovedReservation(updatedBook,false);
     }
+    catch (Exception e){
+
+    }
+} 
 
     public void deleteBook(String isbn) throws ValidationException {
         if (isbn == null || isbn.trim().isEmpty()) {
-            throw new ValidationException("ISBN cannot be empty.");
+            throw new ValidationException("شابک نمی‌تواند خالی باشد.");
         }
 
         boolean removed = bookRepository.remove(isbn);
         if (!removed) {
-            throw new ValidationException("Book not found.");
+            throw new ValidationException("کتاب یافت نشد.");
         }
     }
 
@@ -92,27 +100,27 @@ public class BookService {
 
     public String getBookStatus(String isbn) {
         if (isbn == null || isbn.trim().isEmpty()) {
-            return "Invalid ISBN.";
+            return "شابک نامعتبر است.";
         }
 
         Book book = bookRepository.findByIsbn(isbn);
         if (book == null) {
-            return "Book not found.";
+            return "کتاب یافت نشد.";
         }
 
         StringBuilder status = new StringBuilder();
-        status.append("Title: ").append(book.getTitle()).append("\n");
-        status.append("Author: ").append(book.getAuthor()).append("\n");
-        status.append("Publisher: ").append(book.getPublisher()).append("\n");
-        status.append("Year: ").append(book.getYear()).append("\n");
-        status.append("Category: ").append(book.getCategory()).append("\n");
-        status.append("Total Copies: ").append(book.getTotalCopies()).append("\n");
-        status.append("Available Copies: ").append(book.getAvailableCopies()).append("\n");
+        status.append("عنوان: ").append(book.getTitle()).append("\n");
+        status.append("نویسنده: ").append(book.getAuthor()).append("\n");
+        status.append("ناشر: ").append(book.getPublisher()).append("\n");
+        status.append("سال انتشار: ").append(book.getYear()).append("\n");
+        status.append("دسته‌بندی: ").append(book.getCategory()).append("\n");
+        status.append("تعداد کل: ").append(book.getTotalCopies()).append("\n");
+        status.append("تعداد موجود: ").append(book.getAvailableCopies()).append("\n");
 
         if (book.getAvailableCopies() > 0) {
-            status.append("Status: Available");
+            status.append("وضعیت: موجود");
         } else {
-            status.append("Status: Not Available");
+            status.append("وضعیت: ناموجود");
         }
 
         return status.toString();
@@ -120,28 +128,28 @@ public class BookService {
 
     private void validateBookFields(Book book) throws ValidationException {
         if (book.getTitle() == null || book.getTitle().trim().isEmpty()) {
-            throw new ValidationException("Title cannot be empty.");
+            throw new ValidationException("عنوان نمی‌تواند خالی باشد.");
         }
         if (book.getAuthor() == null || book.getAuthor().trim().isEmpty()) {
-            throw new ValidationException("Author cannot be empty.");
+            throw new ValidationException("نویسنده نمی‌تواند خالی باشد.");
         }
         if (book.getPublisher() == null || book.getPublisher().trim().isEmpty()) {
-            throw new ValidationException("Publisher cannot be empty.");
+            throw new ValidationException("ناشر نمی‌تواند خالی باشد.");
         }
         if (book.getCategory() == null || book.getCategory().trim().isEmpty()) {
-            throw new ValidationException("Category cannot be empty.");
+            throw new ValidationException("دسته‌بندی نمی‌تواند خالی باشد.");
         }
         if (book.getYear() <= 0) {
-            throw new ValidationException("Invalid year.");
+            throw new ValidationException("سال انتشار نامعتبر است.");
         }
         if (book.getTotalCopies() < 0) {
-            throw new ValidationException("Total copies cannot be negative.");
+            throw new ValidationException("تعداد کل نمی‌تواند منفی باشد.");
         }
         if (book.getAvailableCopies() < 0) {
-            throw new ValidationException("Available copies cannot be negative.");
+            throw new ValidationException("تعداد موجود نمی‌تواند منفی باشد.");
         }
         if (book.getAvailableCopies() > book.getTotalCopies()) {
-            throw new ValidationException("Available copies cannot exceed total copies.");
+            throw new ValidationException("تعداد موجود نمی‌تواند از تعداد کل بیشتر باشد.");
         }
     }
 }

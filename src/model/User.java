@@ -49,10 +49,10 @@ public abstract class User implements Serializable {
 
     @Override
     public String toString() {
-        return "User{" +
-                "firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
+        return "کاربر{" +
+                "نام='" + firstName + '\'' +
+                "، نام خانوادگی='" + lastName + '\'' +
+                "، ایمیل='" + email + '\'' +
                 '}';
     }
 }

@@ -38,11 +38,11 @@ public class Librarian extends User {
 
     @Override
     public String toString() {
-        return "Librarian{" +
-                "firstName='" + getFirstName() + '\'' +
-                ", lastName='" + getLastName() + '\'' +
-                ", email='" + getEmail() + '\'' +
-                ", personnelCode='" + personnelCode + '\'' +
+        return "کتابدار{" +
+                "نام='" + getFirstName() + '\'' +
+                "، نام خانوادگی='" + getLastName() + '\'' +
+                "، ایمیل='" + getEmail() + '\'' +
+                "، کد پرسنلی='" + personnelCode + '\'' +
                 '}';
     }
 }

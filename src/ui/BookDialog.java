@@ -41,21 +41,21 @@ public class BookDialog extends JDialog {
     // private final Color TEXT_COLOR = Color.BLACK;
 
     public BookDialog(Frame parent) {
-        super(parent, "Add Book", true);
+        super(parent, "افزودن کتاب", true);
         this.existingBook = null;
         this.bookService = new BookService(new BookRepository());
         initializeDialog();
     }
 
     public BookDialog(Frame parent, BookService bookService) {
-        super(parent, "Add Book", true);
+        super(parent, "افزودن کتاب", true);
         this.existingBook = null;
         this.bookService = bookService;
         initializeDialog();
     }
 
     public BookDialog(Frame parent, Book book, BookService bookService) {
-        super(parent, "Edit Book", true);
+        super(parent, "ویرایش کتاب", true);
         this.existingBook = book;
         this.bookService = bookService;
         initializeDialog();
@@ -217,7 +217,7 @@ public class BookDialog extends JDialog {
         categoryLabel.setForeground(Color.BLACK);
         panel.add(categoryLabel, gbc);
 
-        categoryCombo = new JComboBox<>(new String[]{"Fiction", "Science", "Technology", "History", "Biography", "Mathematics", "Literature", "Other"});
+        categoryCombo = new JComboBox<>(new String[]{"داستانی", "علمی", "فناوری", "تاریخی", "زندگینامه", "ریاضی", "ادبیات", "سایر"});
         categoryCombo.setFont(new Font("Tahoma", Font.PLAIN, 18));
         categoryCombo.setForeground(Color.BLACK);
         categoryCombo.setBackground(Color.WHITE);
@@ -398,7 +398,7 @@ public class BookDialog extends JDialog {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("انتخاب تصویر جلد کتاب");
         fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
-                "Image Files", "jpg", "jpeg", "png"));
+                "فایل‌های تصویری", "jpg", "jpeg", "png"));
 
         int result = fileChooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {

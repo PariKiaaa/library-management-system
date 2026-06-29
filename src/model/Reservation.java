@@ -52,11 +52,11 @@ public class Reservation implements Serializable {
 
     @Override
     public String toString() {
-        return "Reservation{" +
-                "student=" + student.getStudentId() +
-                ", book=" + book.getTitle() +
-                ", requestDate=" + requestDate +
-                ", approved=" + approved +
+        return "رزرو{" +
+                "دانشجو=" + student.getStudentId() +
+                "، کتاب=" + book.getTitle() +
+                "، تاریخ درخواست=" + requestDate +
+                "، تأیید شده=" + approved +
                 '}';
     }
 }

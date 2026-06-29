@@ -47,32 +47,29 @@ public class ReservationService {
         Book managedBook = bookRepository.findByIsbn(book.getIsbn());
 
         if (managedBook == null) {
-            throw new ValidationException("Book not found.");
+            throw new ValidationException("کتاب یافت نشد.");
         }
 
         if (managedBook.getAvailableCopies() > 0) {
             throw new BookNotAvailableException(
-                    "Book is available. Borrow it instead of reserving."
+                    "کتاب موجود است. به جای رزرو می‌توانید امانت بگیرید."
             );
         }
 
-        try {
-            findPendingReservation(student, managedBook);
+try {
+    findPendingReservation(student, managedBook);
+} catch (ValidationException e) {
+    // reservation not found
+    Reservation reservation =
+            new Reservation(student, managedBook, requestDate, false);
 
-            throw new ValidationException(
-                    "You already have a pending reservation for this book."
-            );
+    reservationRepository.add(reservation);
+    return reservation;
+}
 
-        } catch (ValidationException ignored) {
-            // No pending reservation found, continue.
-        }
-
-        Reservation reservation =
-                new Reservation(student, managedBook, requestDate, false);
-
-        reservationRepository.add(reservation);
-
-        return reservation;
+throw new ValidationException(
+        "شما قبلاً برای این کتاب درخواست رزرو ثبت کرده‌اید."
+);
     }
 
     /**
@@ -134,7 +131,7 @@ public class ReservationService {
 
         if (reservation == null) {
             throw new ValidationException(
-                    "Pending reservation not found."
+                    "درخواست رزرو در انتظار یافت نشد."
             );
         }
 
@@ -165,7 +162,7 @@ public class ReservationService {
         }
 
         throw new ValidationException(
-                "Approved reservation not found."
+                "درخواست رزرو تأیید شده یافت نشد."
         );
     }
 
@@ -179,22 +176,47 @@ public class ReservationService {
 
         if (student == null) {
             throw new ValidationException(
-                    "Student cannot be null."
+                    "دانشجو نمی‌تواند خالی باشد."
             );
         }
 
         if (book == null) {
             throw new ValidationException(
-                    "Book cannot be null."
+                    "کتاب نمی‌تواند خالی باشد."
             );
         }
 
         if (requestDate == null) {
             throw new ValidationException(
-                    "Request date cannot be null."
+                    "تاریخ درخواست نمی‌تواند خالی باشد."
             );
         }
 
+    }
+
+    public void processApprovedReservation(Book book, boolean is_reurned)
+            throws ValidationException, BookNotAvailableException {
+
+        if (book.getAvailableCopies() <= 0 && !is_reurned) {
+            return;
+        }
+
+        for (Reservation reservation : reservationRepository.getReservations()) {
+
+            if (reservation.getBook().getIsbn().equals(book.getIsbn())
+                    && reservation.isApproved()) {
+
+                loanService.borrowBook(
+                        reservation.getStudent(),
+                        book.getIsbn(),
+                        LocalDate.now()
+                );
+
+                reservationRepository.remove(reservation);
+
+                return;
+            }
+        }
     }
 
 }

@@ -1,7 +1,7 @@
 package src;
 
 import src.ui.LoginFrame;
-// develop branch
+
 import javax.swing.*;
 
 public class Main {
