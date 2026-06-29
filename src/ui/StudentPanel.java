@@ -216,7 +216,13 @@ public class StudentPanel extends JFrame {
         panel.add(searchField);
 
         searchButton = createStyledButton("جستجو", new Color(52, 152, 219));
-        searchButton.addActionListener(e -> searchBook());
+        searchButton.addActionListener(e -> {
+            bookRepository.load();
+            loanRepository.load();
+            reservationRepository.load();
+            loadBooks(bookService.getAllBooks());
+            searchBook();
+        });
         panel.add(searchButton);
 
         refreshButton = createStyledButton("بروزرسانی", new Color(52, 152, 219));
@@ -244,11 +250,40 @@ public class StudentPanel extends JFrame {
         returnBookButton = createStyledButton("بازگشت کتاب", new Color(231, 76, 60));
         myLoansButton = createStyledButton("کتاب‌های من", new Color(155, 89, 182));
 
-        reserveButton.addActionListener(e -> reserveBook());
-        extendButton.addActionListener(e -> extendLoan());
-        loanButton.addActionListener(e -> loanBook());
-        returnBookButton.addActionListener(e -> returnBook());
-        myLoansButton.addActionListener(e -> showMyLoans());
+        reserveButton.addActionListener(e -> {
+            bookRepository.load();
+            loanRepository.load();
+            reservationRepository.load();
+            loadBooks(bookService.getAllBooks());
+            reserveBook();
+        });
+        extendButton.addActionListener(e -> {
+            bookRepository.load();
+            loanRepository.load();
+            reservationRepository.load();
+            loadBooks(bookService.getAllBooks());
+            extendLoan();
+        });
+        loanButton.addActionListener(e -> {
+            bookRepository.load();
+            loanRepository.load();
+            reservationRepository.load();
+            loadBooks(bookService.getAllBooks());
+            loanBook();});
+        returnBookButton.addActionListener(e -> {
+            bookRepository.load();
+            loanRepository.load();
+            reservationRepository.load();
+            loadBooks(bookService.getAllBooks());
+            returnBook();
+        });
+        myLoansButton.addActionListener(e -> {
+            bookRepository.load();
+            loanRepository.load();
+            reservationRepository.load();
+            loadBooks(bookService.getAllBooks());
+            showMyLoans();
+        });
 
         panel.add(reserveButton);
         panel.add(extendButton);
