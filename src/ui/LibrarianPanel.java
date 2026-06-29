@@ -12,6 +12,8 @@ import src.repository.UserRepository;
 import src.service.BookService;
 import src.service.LoanService;
 import src.service.ReservationService;
+import src.util.FileUtil;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,6 +22,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableRowSorter;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 // import java.io.File;
@@ -42,6 +45,8 @@ public class LibrarianPanel extends JFrame {
     private JTextField booksSearchField;
     private JComboBox<String> booksSearchCombo;
 
+    private JLabel searchResultLabel;
+
     private JTable reservationsTable;
     private DefaultTableModel reservationsTableModel;
 
@@ -58,7 +63,8 @@ public class LibrarianPanel extends JFrame {
     private JLabel totalBooksLabel;
     private JLabel availableBooksLabel;
     private JLabel borrowedBooksLabel;
-    private int dailyFine = 5000;
+    private int dailyFine;
+    private static final String SETTINGS_FILE = "settings.dat";
 
     // Colors
     private final Color PRIMARY_COLOR = new Color(255, 107, 107);
@@ -82,8 +88,9 @@ public class LibrarianPanel extends JFrame {
         bookService = new BookService(bookRepository);
         loanService = new LoanService(bookRepository, loanRepository);
         reservationService = new ReservationService(reservationRepository, bookRepository, loanService);
-
+        
         initializePanel();
+
     }
 
     private void initializePanel() {
@@ -92,6 +99,8 @@ public class LibrarianPanel extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setBackground(BACKGROUND_COLOR);
+
+        loadSettings();
 
         try {
             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
@@ -153,6 +162,8 @@ public class LibrarianPanel extends JFrame {
         headerPanel.add(headerLabel);
         
         add(headerPanel, BorderLayout.NORTH);
+
+
     }
 
     private JPanel createBooksTab() {
@@ -208,6 +219,25 @@ public class LibrarianPanel extends JFrame {
         
         setColumnSizes(booksTable, new int[]{60, 80, 150, 120, 100, 70, 100, 90, 110});
 
+        // ===== تنظیم مرتب‌سازی مانند StudentPanel =====
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(booksTableModel);
+        booksTable.setRowSorter(sorter);
+
+        sorter.setSortable(0, false); // تصویر
+        sorter.setSortable(6, false); // موضوع
+        sorter.setSortable(7, false); // تعداد کل
+        sorter.setSortable(8, false); // موجود
+        
+        sorter.setComparator(5, (o1, o2) -> {
+            try {
+                Integer year1 = Integer.parseInt(o1.toString());
+                Integer year2 = Integer.parseInt(o2.toString());
+                return year1.compareTo(year2);
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        });
+
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         topPanel.setBackground(BACKGROUND_COLOR);
         topPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -237,6 +267,13 @@ public class LibrarianPanel extends JFrame {
         
         JButton searchButton = createStyledButton("جستجو", BUTTON_COLOR);
         topPanel.add(searchButton);
+
+        // label تعداد نتایج
+        searchResultLabel = new JLabel("تعداد نتایج: ۰");
+        searchResultLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
+        searchResultLabel.setForeground(new Color(143, 143, 143));
+        searchResultLabel.setBorder(new EmptyBorder(0, 20, 0, 0));
+        topPanel.add(searchResultLabel);
 
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         bottomPanel.setBackground(BACKGROUND_COLOR);
@@ -565,31 +602,44 @@ private JPanel createReportsTab() {
         public void removeUpdate(javax.swing.event.DocumentEvent e) { updateButtonState(); }
         public void insertUpdate(javax.swing.event.DocumentEvent e) { updateButtonState(); }
     });
-    updateFineButton.addActionListener(e -> {
-        try {
-            int newFine = Integer.parseInt(dailyFineField.getText().trim());
-            if (newFine <= 0) {
+        updateFineButton.addActionListener(e -> {
+            try {
+                int newFine = Integer.parseInt(dailyFineField.getText().trim());
+                if (newFine <= 0) {
+                    JOptionPane.showMessageDialog(
+                            LibrarianPanel.this,
+                            "جریمه روزانه باید عددی مثبت باشد.",
+                            "خطا",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+                
+                // به‌روزرسانی مقدار
+                dailyFine = newFine;
+                
+                // ذخیره در فایل
+                saveSettings(); // این خط را اضافه کنید
+                
+                dailyFineField.setText(String.valueOf(dailyFine));
+                refreshReports();
+                
                 JOptionPane.showMessageDialog(
                         LibrarianPanel.this,
-                        "جریمه روزانه باید عددی مثبت باشد.",
+                        "جریمه روزانه با موفقیت ذخیره شد.",
+                        "موفقیت",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+                
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(
+                        LibrarianPanel.this,
+                        "لطفاً یک عدد معتبر وارد کنید.",
                         "خطا",
                         JOptionPane.ERROR_MESSAGE
                 );
-                return;
             }
-            dailyFine = newFine;
-            dailyFineField.setText(String.valueOf(dailyFine));
-            refreshReports();
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(
-                    LibrarianPanel.this,
-                    "لطفاً یک عدد معتبر وارد کنید.",
-                    "خطا",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }
-    });
-    
+        }); 
     summaryPanel.add(totalBooksLabel);
     summaryPanel.add(availableBooksLabel);
     summaryPanel.add(borrowedBooksLabel);
@@ -866,6 +916,14 @@ private JPanel createReportsTab() {
                     book.getTotalCopies(),
                     book.getAvailableCopies()
             });
+            
+        }
+        searchResultLabel.setText("تعداد نتایج: " + booksTableModel.getRowCount());
+        
+        // ریست سورتر بعد از به‌روزرسانی
+        TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) booksTable.getRowSorter();
+        if (sorter != null) {
+            sorter.setRowFilter(null);
         }
     }
 
@@ -875,6 +933,7 @@ private JPanel createReportsTab() {
 
         if (keyword.isEmpty()) {
             refreshBooksTable();
+            searchResultLabel.setText("تعداد نتایج: " + booksTableModel.getRowCount());
             return;
         }
 
@@ -919,6 +978,14 @@ private JPanel createReportsTab() {
                     book.getTotalCopies(),
                     book.getAvailableCopies()
             });
+        }
+        // آپدیت تعداد نتایج
+        searchResultLabel.setText("تعداد نتایج: " + booksTableModel.getRowCount());
+        
+        // ریست سورتر بعد از جستجو
+        TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) booksTable.getRowSorter();
+        if (sorter != null) {
+            sorter.setRowFilter(null);
         }
     }
 
@@ -1361,4 +1428,38 @@ private void writeCsvFile(String filePath, List<String[]> data) throws IOExcepti
         writer.flush();
     }
 }
+
+private void loadSettings() {
+    File file = new File(SETTINGS_FILE);
+    if (file.exists()) {
+        try {
+            java.util.List<Integer> settings = (java.util.List<Integer>) FileUtil.load(SETTINGS_FILE);
+            if (!settings.isEmpty()) {
+                dailyFine = settings.get(0);
+            } else {
+                dailyFine = 5000;
+                saveSettings();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            dailyFine = 5000;
+            saveSettings();
+        }
+    } else {
+        dailyFine = 5000;
+        saveSettings(); 
+        // System.out.println("فایل تنظیمات وجود نداشت، مقدار پیش‌فرض: " + dailyFine);
+    }
+}
+
+    private void saveSettings() {
+        try {
+            java.util.List<Integer> settings = new java.util.ArrayList<>();
+            settings.add(dailyFine);
+            FileUtil.save(SETTINGS_FILE, settings);
+        } catch (Exception e) {
+            // e.printStackTrace();
+        }
+    }
+
 }

@@ -13,10 +13,13 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableRowSorter;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Student dashboard.
@@ -37,6 +40,8 @@ public class StudentPanel extends JFrame {
     private DefaultTableModel tableModel;
 
     private JTextField searchField;
+    private JComboBox<String> searchCombo;
+    private JLabel searchResultLabel;
 
     private JButton loanButton;
     private JButton returnBookButton;
@@ -51,11 +56,9 @@ public class StudentPanel extends JFrame {
     private final Color SECONDARY_COLOR = new Color(78, 205, 196);
     private final Color BACKGROUND_COLOR = new Color(247, 218, 181);
     private final Color HEADER_COLOR = new Color(247, 218, 181);
-    // private final Color BUTTON_COLOR = new Color(52, 152, 219);
     private final Color TABLE_ALTERNATE_COLOR = new Color(236, 240, 241);
     private final Color SELECTION_COLOR = new Color(52, 152, 219);
     private final Color SELECTION_TEXT_COLOR = Color.WHITE;
-    // private final Color TEXT_COLOR = Color.BLACK;
 
     public StudentPanel(Student student) {
 
@@ -77,7 +80,6 @@ public class StudentPanel extends JFrame {
         initializeTable();
         initializeTopPanel();
         initializeBottomPanel();
-        // System.out.println(bookRepository.findByIsbn(isbn).getAvailableCopies());
         loadBooks(bookService.getAllBooks());
     }
 
@@ -120,35 +122,44 @@ public class StudentPanel extends JFrame {
         // Header Panel
         JPanel headerPanel = new JPanel();
         headerPanel.setBackground(HEADER_COLOR);
-        headerPanel.setPreferredSize(new Dimension(0, 60));
-        headerPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+        headerPanel.setPreferredSize(new Dimension(0, 70));
+        headerPanel.setLayout(new BorderLayout());
         headerPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         
         JLabel headerLabel = new JLabel("پنل دانشجو - " + student.getFirstName() + " " + student.getLastName());
-        headerLabel.setFont(new Font("Tahoma", Font.BOLD, 22));
+        headerLabel.setFont(new Font("Tahoma", Font.BOLD, 24));
         headerLabel.setForeground(Color.BLACK);
-        headerPanel.add(headerLabel);
+        headerLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        headerPanel.add(headerLabel, BorderLayout.CENTER);
+        
+        // تاریخ امروز
+        JLabel dateLabel = new JLabel();
+        dateLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        dateLabel.setForeground(Color.BLACK);
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("EEEE, dd MMMM yyyy", new java.util.Locale("fa"));
+        String today = sdf.format(new java.util.Date());
+        dateLabel.setText("📅 " + today);
+        dateLabel.setBorder(new EmptyBorder(0, 20, 0, 0));
+        headerPanel.add(dateLabel, BorderLayout.WEST);
+        
+        JLabel userLabel = new JLabel("👤 " + student.getFirstName());
+        userLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        userLabel.setForeground(Color.BLACK);
+        userLabel.setBorder(new EmptyBorder(0, 0, 0, 20));
+        headerPanel.add(userLabel, BorderLayout.EAST);
         
         add(headerPanel, BorderLayout.NORTH);
     }
 
     private void initializeTable() {
 
+        // ===== ساختار جدول مانند پنل کتابدار =====
         tableModel = new DefaultTableModel(
-                new Object[]{
-                        "تصویر",
-                        "شابک",
-                        "عنوان",
-                        "نویسنده",
-                        "دسته‌بندی",
-                        "موجود"
-                }, 0) {
-
+                new Object[]{"تصویر", "شابک", "عنوان", "نویسنده", "ناشر", "سال", "موضوع", "تعداد کل", "موجود"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
-
         };
 
         bookTable = new JTable(tableModel);
@@ -179,6 +190,24 @@ public class StudentPanel extends JFrame {
         
         bookTable.getColumnModel().getColumn(0).setCellRenderer(new ImageRenderer());
         
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+        bookTable.setRowSorter(sorter);
+
+        sorter.setSortable(0, false); // تصویر
+        sorter.setSortable(6, false); // موضوع
+        sorter.setSortable(7, false); // تعداد کل
+        sorter.setSortable(8, false); // موجود
+        
+        sorter.setComparator(5, (o1, o2) -> {
+            try {
+                Integer year1 = Integer.parseInt(o1.toString());
+                Integer year2 = Integer.parseInt(o2.toString());
+                return year1.compareTo(year2);
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        });
+        
         JTableHeader header = bookTable.getTableHeader();
         header.setBackground(HEADER_COLOR);
         header.setForeground(Color.BLACK);
@@ -186,7 +215,7 @@ public class StudentPanel extends JFrame {
         header.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         ((DefaultTableCellRenderer)header.getDefaultRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
         
-        setColumnSizes(bookTable, new int[]{60, 100, 200, 150, 120, 80});
+        setColumnSizes(bookTable, new int[]{60, 80, 150, 120, 100, 70, 100, 90, 110});
 
         JScrollPane scrollPane = new JScrollPane(bookTable);
         scrollPane.setBorder(BorderFactory.createLineBorder(PRIMARY_COLOR, 1));
@@ -200,12 +229,12 @@ public class StudentPanel extends JFrame {
         panel.setBorder(new EmptyBorder(10, 10, 10, 10));
         panel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 
-        JLabel searchLabel = new JLabel("عنوان:");
+        JLabel searchLabel = new JLabel("جستجو:");
         searchLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
         searchLabel.setForeground(Color.BLACK);
         panel.add(searchLabel);
 
-        searchField = new JTextField(20);
+        searchField = new JTextField(15);
         searchField.setFont(new Font("Tahoma", Font.PLAIN, 16));
         searchField.setForeground(Color.BLACK);
         searchField.setBackground(Color.WHITE);
@@ -213,26 +242,27 @@ public class StudentPanel extends JFrame {
             BorderFactory.createLineBorder(PRIMARY_COLOR, 1),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
+        // جستجو با Enter
+        searchField.addActionListener(e -> searchBook());
         panel.add(searchField);
 
+        // کامبوباکس انتخاب معیار جستجو
+        searchCombo = new JComboBox<>(new String[]{"عنوان", "نویسنده", "موضوع", "سال"});
+        searchCombo.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        searchCombo.setBackground(Color.WHITE);
+        searchCombo.setForeground(Color.BLACK);
+        searchCombo.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        panel.add(searchCombo);
+
         searchButton = createStyledButton("جستجو", new Color(52, 152, 219));
-        searchButton.addActionListener(e -> {
-            // bookRepository.load();
-            // loanRepository.load();
-            // reservationRepository.load();
-            // loadBooks(bookService.getAllBooks());
-            searchBook();
-        });
+        searchButton.addActionListener(e -> searchBook());
         panel.add(searchButton);
 
-        refreshButton = createStyledButton("بروزرسانی", new Color(52, 152, 219));
-        refreshButton.addActionListener(e -> {
-            bookRepository.load();
-            loanRepository.load();
-            reservationRepository.load();
-            loadBooks(bookService.getAllBooks());
-        });
-        panel.add(refreshButton);
+        searchResultLabel = new JLabel("تعداد نتایج: ۰");
+        searchResultLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
+        searchResultLabel.setForeground(new Color(143, 143, 143));
+        searchResultLabel.setBorder(new EmptyBorder(0, 20, 0, 0));
+        panel.add(searchResultLabel);
 
         add(panel, BorderLayout.NORTH);
     }
@@ -245,51 +275,29 @@ public class StudentPanel extends JFrame {
         panel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 
         reserveButton = createStyledButton("رزرو", new Color(255, 159, 67));
-        extendButton = createStyledButton("تمدید", new Color(52, 152, 219));
+        extendButton = createStyledButton("تمدید", new Color(220, 230, 83));
         loanButton = createStyledButton("امانت", new Color(46, 204, 113));
         returnBookButton = createStyledButton("بازگشت کتاب", new Color(231, 76, 60));
         myLoansButton = createStyledButton("کتاب‌های من", new Color(155, 89, 182));
-
-        reserveButton.addActionListener(e -> {
-            // bookRepository.load();
-            // loanRepository.load();
-            // reservationRepository.load();
-            // loadBooks(bookService.getAllBooks());
-            reserveBook();
+        refreshButton = createStyledButton("بروزرسانی", new Color(52, 152, 219));
+        refreshButton.addActionListener(e -> {
+            bookRepository.load();
+            loanRepository.load();
+            reservationRepository.load();
+            loadBooks(bookService.getAllBooks());
         });
-        extendButton.addActionListener(e -> {
-            // bookRepository.load();
-            // loanRepository.load();
-            // reservationRepository.load();
-            // loadBooks(bookService.getAllBooks());
-            extendLoan();
-        });
-        loanButton.addActionListener(e -> {
-            // bookRepository.load();
-            // loanRepository.load();
-            // reservationRepository.load();
-            // loadBooks(bookService.getAllBooks());
-            loanBook();});
-        returnBookButton.addActionListener(e -> {
-            // bookRepository.load();
-            // loanRepository.load();
-            // reservationRepository.load();
-            // loadBooks(bookService.getAllBooks());
-            returnBook();
-        });
-        myLoansButton.addActionListener(e -> {
-            // bookRepository.load();
-            // loanRepository.load();
-            // reservationRepository.load();
-            // loadBooks(bookService.getAllBooks());
-            showMyLoans();
-        });
+        reserveButton.addActionListener(e -> reserveBook());
+        extendButton.addActionListener(e -> extendLoan());
+        loanButton.addActionListener(e -> loanBook());
+        returnBookButton.addActionListener(e -> returnBook());
+        myLoansButton.addActionListener(e -> showMyLoans());
 
         panel.add(reserveButton);
         panel.add(extendButton);
         panel.add(loanButton);
         panel.add(returnBookButton);
         panel.add(myLoansButton);
+        panel.add(refreshButton);
 
         add(panel, BorderLayout.SOUTH);
     }
@@ -371,12 +379,25 @@ public class StudentPanel extends JFrame {
                     book.getIsbn(),
                     book.getTitle(),
                     book.getAuthor(),
+                    book.getPublisher(),
+                    book.getYear(),
                     book.getCategory(),
+                    book.getTotalCopies(),
                     book.getAvailableCopies()
             });
 
         }
-
+        
+        // آپدیت تعداد نتایج
+        if (searchResultLabel != null) {
+            searchResultLabel.setText("تعداد نتایج: " + tableModel.getRowCount());
+        }
+        
+        // ریست سورتر بعد از بارگذاری
+        TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) bookTable.getRowSorter();
+        if (sorter != null) {
+            sorter.setRowFilter(null);
+        }
     }
 
     private ImageIcon loadCoverImage(String imagePath) {
@@ -401,18 +422,53 @@ public class StudentPanel extends JFrame {
     private void searchBook() {
 
         String keyword = searchField.getText().trim();
+        String criteria = (String) searchCombo.getSelectedItem();
 
         if (keyword.isEmpty()) {
-
             loadBooks(bookService.getAllBooks());
-
             return;
         }
 
-        loadBooks(bookService.searchByTitle(keyword));
-        bookRepository.load();
-        loanRepository.load();
-        reservationRepository.load();
+        List<Book> results = new ArrayList<>();
+        
+        switch (criteria) {
+            case "عنوان":
+                results = bookService.searchByTitle(keyword);
+                break;
+            case "نویسنده":
+                results = bookService.searchByAuthor(keyword);
+                break;
+            case "موضوع":
+                results = bookService.searchByCategory(keyword);
+                break;
+            case "سال":
+                try {
+                    int year = Integer.parseInt(keyword);
+                    results = bookService.getAllBooks().stream()
+                            .filter(b -> b.getYear() == year)
+                            .collect(Collectors.toList());
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "لطفاً یک سال معتبر وارد کنید (مثال: 1400).",
+                            "خطا",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+                break;
+            default:
+                results = bookService.searchByTitle(keyword);
+                break;
+        }
+
+        loadBooks(results);
+        
+        // ریست سورتر بعد از جستجو
+        TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) bookTable.getRowSorter();
+        if (sorter != null) {
+            sorter.setRowFilter(null);
+        }
     }
     
     private void reserveBook() {
@@ -659,4 +715,4 @@ public class StudentPanel extends JFrame {
 
     }
 
-} 
+}
