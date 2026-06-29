@@ -7,11 +7,14 @@ import src.service.BookService;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
 
 public class BookDialog extends JDialog {
 
@@ -34,11 +37,8 @@ public class BookDialog extends JDialog {
 
     // Colors
     private final Color PRIMARY_COLOR = new Color(255, 107, 107);
-    // private final Color SECONDARY_COLOR = new Color(78, 205, 196);
     private final Color BACKGROUND_COLOR = new Color(245, 247, 250);
     private final Color HEADER_COLOR = new Color(200, 200, 200);
-    // private final Color BUTTON_COLOR = new Color(52, 152, 219);
-    // private final Color TEXT_COLOR = Color.BLACK;
 
     public BookDialog(Frame parent) {
         super(parent, "افزودن کتاب", true);
@@ -63,7 +63,7 @@ public class BookDialog extends JDialog {
     }
 
     private void initializeDialog() {
-        setSize(650, 800);
+        setSize(650, 850);
         setLocationRelativeTo(getParent());
         getContentPane().setBackground(BACKGROUND_COLOR);
         setLayout(new BorderLayout(10, 10));
@@ -74,7 +74,7 @@ public class BookDialog extends JDialog {
             UIManager.put("control", BACKGROUND_COLOR);
             
             Font defaultFont = new Font("Tahoma", Font.PLAIN, 18);
-            // Font boldFont = new Font("Tahoma", Font.BOLD, 18);
+            Font boldFont = new Font("Tahoma", Font.BOLD, 18);
             
             UIManager.put("Button.font", defaultFont);
             UIManager.put("Label.font", defaultFont);
@@ -133,6 +133,9 @@ public class BookDialog extends JDialog {
             BorderFactory.createLineBorder(PRIMARY_COLOR, 1),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
+        // تنظیم راست‌به‌چپ برای تایپ فارسی
+        titleField.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        titleField.setHorizontalAlignment(JTextField.RIGHT);
         gbc.gridx = 1;
         panel.add(titleField, gbc);
 
@@ -152,6 +155,9 @@ public class BookDialog extends JDialog {
             BorderFactory.createLineBorder(PRIMARY_COLOR, 1),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
+        // تنظیم راست‌به‌چپ برای تایپ فارسی
+        authorField.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        authorField.setHorizontalAlignment(JTextField.RIGHT);
         gbc.gridx = 1;
         panel.add(authorField, gbc);
 
@@ -171,6 +177,9 @@ public class BookDialog extends JDialog {
             BorderFactory.createLineBorder(PRIMARY_COLOR, 1),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
+        // شابک معمولاً انگلیسی است، پس چپ‌به‌راست
+        isbnField.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+        isbnField.setHorizontalAlignment(JTextField.LEFT);
         gbc.gridx = 1;
         panel.add(isbnField, gbc);
 
@@ -190,6 +199,9 @@ public class BookDialog extends JDialog {
             BorderFactory.createLineBorder(PRIMARY_COLOR, 1),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
+        // تنظیم راست‌به‌چپ برای تایپ فارسی
+        publisherField.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        publisherField.setHorizontalAlignment(JTextField.RIGHT);
         gbc.gridx = 1;
         panel.add(publisherField, gbc);
 
@@ -257,7 +269,7 @@ public class BookDialog extends JDialog {
         gbc.gridx = 1;
         panel.add(availableCopiesSpinner, gbc);
 
-        // Book Cover - با تنظیمات جدید
+        // Book Cover
         gbc.gridx = 0;
         gbc.gridy = 8;
         JLabel coverLabel = new JLabel("تصویر جلد:");
@@ -274,8 +286,14 @@ public class BookDialog extends JDialog {
         buttonPanel.setBackground(BACKGROUND_COLOR);
         buttonPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         
+        // دکمه انتخاب تصویر
         JButton browseButton = createStyledButton("انتخاب تصویر", new Color(52, 152, 219));
         browseButton.addActionListener(e -> chooseImage());
+        
+        // دکمه جستجوی تصویر در گوگل
+        JButton googleSearchButton = createGoogleSearchButton();
+        
+        buttonPanel.add(googleSearchButton);
         buttonPanel.add(browseButton);
         
         imagePanel.add(buttonPanel, BorderLayout.NORTH);
@@ -345,6 +363,84 @@ public class BookDialog extends JDialog {
         return button;
     }
 
+    // دکمه جستجوی تصویر در گوگل
+    private JButton createGoogleSearchButton() {
+        JButton googleButton = new JButton("جستجوی تصویر در گوگل");
+        googleButton.setFont(new Font("Tahoma", Font.BOLD, 14));
+        googleButton.setBackground(new Color(66, 133, 244));
+        googleButton.setForeground(Color.WHITE);
+        googleButton.setFocusPainted(false);
+        googleButton.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(66, 133, 244).darker(), 2),
+            new EmptyBorder(8, 15, 8, 15)
+        ));
+        googleButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        googleButton.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        
+        googleButton.addActionListener(e -> searchImageOnGoogle());
+        
+        googleButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                googleButton.setBackground(new Color(52, 120, 230));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                googleButton.setBackground(new Color(66, 133, 244));
+            }
+        });
+        
+        return googleButton;
+    }
+
+    // متد جستجوی تصویر در گوگل
+    private void searchImageOnGoogle() {
+        String bookTitle = titleField.getText().trim();
+        
+        if (bookTitle.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                this,
+                "لطفاً ابتدا عنوان کتاب را وارد کنید.",
+                "خطا",
+                JOptionPane.WARNING_MESSAGE
+            );
+            titleField.requestFocus();
+            return;
+        }
+        
+        try {
+            // ساخت عبارت جستجو
+            String searchQuery = "کتاب " + bookTitle + " جلد";
+            String encodedQuery = URLEncoder.encode(searchQuery, "UTF-8");
+            String googleImageUrl = "https://www.google.com/search?q=" + encodedQuery + "&tbm=isch";
+            
+            // باز کردن در مرورگر پیش‌فرض
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().browse(URI.create(googleImageUrl));
+                
+                // JOptionPane.showMessageDialog(
+                //     this,
+                //     "صفحه جستجوی تصاویر گوگل باز شد.\n" +
+                //     "تصویر مورد نظر را پیدا کنید، دانلود و سپس در فرم انتخاب کنید.",
+                //     "جستجوی تصویر",
+                //     JOptionPane.INFORMATION_MESSAGE
+                // );
+            } else {
+                JOptionPane.showMessageDialog(
+                    this,
+                    "سیستم شما از باز کردن مرورگر پشتیبانی نمی‌کند.",
+                    "خطا",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(
+                this,
+                "خطا در باز کردن مرورگر: " + ex.getMessage(),
+                "خطا",
+                JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
     private void loadBook() {
         if (existingBook != null) {
             isbnField.setText(existingBook.getIsbn());
@@ -394,58 +490,114 @@ public class BookDialog extends JDialog {
         }
     }
 
-    private void chooseImage() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("انتخاب تصویر جلد کتاب");
-        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
-                "فایل‌های تصویری", "jpg", "jpeg", "png"));
+private void chooseImage() {
+    JFileChooser fileChooser = new JFileChooser();
+    fileChooser.setDialogTitle("انتخاب تصویر جلد کتاب");
+    fileChooser.setFileFilter(new FileNameExtensionFilter(
+            "فایل‌های تصویری", "jpg", "jpeg", "png"));
 
-        int result = fileChooser.showOpenDialog(this);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-            String path = selectedFile.getAbsolutePath();
-            String lowerPath = path.toLowerCase();
+    // ===== تنظیمات بزرگنمایی فایل‌چووزر =====
+    UIManager.put("FileChooser.font", new Font("Tahoma", Font.PLAIN, 18));
+    UIManager.put("FileChooser.listFont", new Font("Tahoma", Font.PLAIN, 18));
+    UIManager.put("FileChooser.iconFont", new Font("Tahoma", Font.PLAIN, 18));
+    UIManager.put("FileChooser.fileNameLabelFont", new Font("Tahoma", Font.PLAIN, 18));
+    UIManager.put("FileChooser.filesOfTypeLabelFont", new Font("Tahoma", Font.PLAIN, 18));
+    UIManager.put("FileChooser.lookInLabelFont", new Font("Tahoma", Font.PLAIN, 18));
+    UIManager.put("FileChooser.saveInLabelFont", new Font("Tahoma", Font.PLAIN, 18));
+    UIManager.put("FileChooser.folderNameLabelFont", new Font("Tahoma", Font.PLAIN, 18));
+    
+    SwingUtilities.updateComponentTreeUI(fileChooser);
+    fileChooser.setPreferredSize(new Dimension(900, 600));
 
-            if (lowerPath.endsWith(".jpg") || lowerPath.endsWith(".jpeg") || lowerPath.endsWith(".png")) {
-                File coversDir = new File(COVERS_DIR);
-                if (!coversDir.exists()) {
-                    coversDir.mkdirs();
-                }
-
-                String extension = getFileExtension(selectedFile.getName());
-                String uniqueName = System.currentTimeMillis() + extension;
-                File destFile = new File(coversDir, uniqueName);
-
-                try (FileInputStream fis = new FileInputStream(selectedFile);
-                     FileOutputStream fos = new FileOutputStream(destFile)) {
-
-                    byte[] buffer = new byte[8192];
-                    int bytesRead;
-                    while ((bytesRead = fis.read(buffer)) != -1) {
-                        fos.write(buffer, 0, bytesRead);
-                    }
-
-                    imagePath = uniqueName;
-                    updateImagePreview();
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "خطا در کپی کردن تصویر: " + ex.getMessage(),
-                            "خطا",
-                            JOptionPane.ERROR_MESSAGE
+    // ===== اضافه کردن پیش‌نمایش تصویر =====
+    JLabel previewLabel = new JLabel("پیش نمایش تصویر", JLabel.CENTER);
+    previewLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+    previewLabel.setPreferredSize(new Dimension(200, 200));
+    previewLabel.setMinimumSize(new Dimension(200, 200));
+    previewLabel.setBackground(Color.WHITE);
+    previewLabel.setOpaque(true);
+    previewLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
+    
+    // تنظیم پیش‌نمایش وقتی فایلی انتخاب میشه
+    fileChooser.addPropertyChangeListener(JFileChooser.SELECTED_FILE_CHANGED_PROPERTY, evt -> {
+        File selectedFile = fileChooser.getSelectedFile();
+        if (selectedFile != null && selectedFile.exists() && selectedFile.isFile()) {
+            String fileName = selectedFile.getName().toLowerCase();
+            // بررسی اینکه فایل تصویر هست یا نه
+            if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || 
+                fileName.endsWith(".png") || fileName.endsWith(".gif") || 
+                fileName.endsWith(".bmp")) {
+                try {
+                    // بارگذاری و تغییر اندازه تصویر
+                    ImageIcon icon = new ImageIcon(selectedFile.getAbsolutePath());
+                    Image scaledImage = icon.getImage().getScaledInstance(
+                        180, 180, Image.SCALE_SMOOTH
                     );
+                    previewLabel.setIcon(new ImageIcon(scaledImage));
+                    previewLabel.setText("");
+                    previewLabel.setHorizontalAlignment(JLabel.CENTER);
+                } catch (Exception ex) {
+                    previewLabel.setIcon(null);
+                    previewLabel.setText("خطا در بارگذاری");
                 }
             } else {
+                previewLabel.setIcon(null);
+                previewLabel.setText("فایل تصویر نیست");
+            }
+        } else {
+            previewLabel.setIcon(null);
+            previewLabel.setText("پیش نمایش تصویر");
+        }
+    });
+    
+    // اضافه کردن پیش‌نمایش به عنوان Accessory
+    fileChooser.setAccessory(previewLabel);
+
+    int result = fileChooser.showOpenDialog(this);
+    if (result == JFileChooser.APPROVE_OPTION) {
+        File selectedFile = fileChooser.getSelectedFile();
+        String path = selectedFile.getAbsolutePath();
+        String lowerPath = path.toLowerCase();
+
+        if (lowerPath.endsWith(".jpg") || lowerPath.endsWith(".jpeg") || lowerPath.endsWith(".png")) {
+            File coversDir = new File(COVERS_DIR);
+            if (!coversDir.exists()) {
+                coversDir.mkdirs();
+            }
+
+            String extension = getFileExtension(selectedFile.getName());
+            String uniqueName = System.currentTimeMillis() + extension;
+            File destFile = new File(coversDir, uniqueName);
+
+            try (FileInputStream fis = new FileInputStream(selectedFile);
+                 FileOutputStream fos = new FileOutputStream(destFile)) {
+
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+                while ((bytesRead = fis.read(buffer)) != -1) {
+                    fos.write(buffer, 0, bytesRead);
+                }
+
+                imagePath = uniqueName;
+                updateImagePreview();
+            } catch (IOException ex) {
                 JOptionPane.showMessageDialog(
                         this,
-                        "لطفاً یک تصویر معتبر انتخاب کنید (jpg, jpeg, png).",
-                        "فایل نامعتبر",
+                        "خطا در کپی کردن تصویر: " + ex.getMessage(),
+                        "خطا",
                         JOptionPane.ERROR_MESSAGE
                 );
             }
+        } else {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "لطفاً یک تصویر معتبر انتخاب کنید (jpg, jpeg, png).",
+                    "فایل نامعتبر",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
-
+}
     private String getFileExtension(String fileName) {
         int lastIndexOf = fileName.lastIndexOf(".");
         if (lastIndexOf == -1) {
