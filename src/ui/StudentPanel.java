@@ -217,10 +217,10 @@ public class StudentPanel extends JFrame {
 
         searchButton = createStyledButton("جستجو", new Color(52, 152, 219));
         searchButton.addActionListener(e -> {
-            bookRepository.load();
-            loanRepository.load();
-            reservationRepository.load();
-            loadBooks(bookService.getAllBooks());
+            // bookRepository.load();
+            // loanRepository.load();
+            // reservationRepository.load();
+            // loadBooks(bookService.getAllBooks());
             searchBook();
         });
         panel.add(searchButton);
@@ -251,37 +251,37 @@ public class StudentPanel extends JFrame {
         myLoansButton = createStyledButton("کتاب‌های من", new Color(155, 89, 182));
 
         reserveButton.addActionListener(e -> {
-            bookRepository.load();
-            loanRepository.load();
-            reservationRepository.load();
-            loadBooks(bookService.getAllBooks());
+            // bookRepository.load();
+            // loanRepository.load();
+            // reservationRepository.load();
+            // loadBooks(bookService.getAllBooks());
             reserveBook();
         });
         extendButton.addActionListener(e -> {
-            bookRepository.load();
-            loanRepository.load();
-            reservationRepository.load();
-            loadBooks(bookService.getAllBooks());
+            // bookRepository.load();
+            // loanRepository.load();
+            // reservationRepository.load();
+            // loadBooks(bookService.getAllBooks());
             extendLoan();
         });
         loanButton.addActionListener(e -> {
-            bookRepository.load();
-            loanRepository.load();
-            reservationRepository.load();
-            loadBooks(bookService.getAllBooks());
+            // bookRepository.load();
+            // loanRepository.load();
+            // reservationRepository.load();
+            // loadBooks(bookService.getAllBooks());
             loanBook();});
         returnBookButton.addActionListener(e -> {
-            bookRepository.load();
-            loanRepository.load();
-            reservationRepository.load();
-            loadBooks(bookService.getAllBooks());
+            // bookRepository.load();
+            // loanRepository.load();
+            // reservationRepository.load();
+            // loadBooks(bookService.getAllBooks());
             returnBook();
         });
         myLoansButton.addActionListener(e -> {
-            bookRepository.load();
-            loanRepository.load();
-            reservationRepository.load();
-            loadBooks(bookService.getAllBooks());
+            // bookRepository.load();
+            // loanRepository.load();
+            // reservationRepository.load();
+            // loadBooks(bookService.getAllBooks());
             showMyLoans();
         });
 
@@ -410,6 +410,9 @@ public class StudentPanel extends JFrame {
         }
 
         loadBooks(bookService.searchByTitle(keyword));
+        bookRepository.load();
+        loanRepository.load();
+        reservationRepository.load();
     }
     
     private void reserveBook() {
@@ -419,7 +422,10 @@ public class StudentPanel extends JFrame {
         if (book == null) {
             return;
         }
-
+        bookRepository.load();
+        loanRepository.load();
+        reservationRepository.load();
+        loadBooks(bookService.getAllBooks());
         try {
 
             reservationService.createReservation(
@@ -453,7 +459,10 @@ public class StudentPanel extends JFrame {
         if (book == null) {
             return;
         }
-
+        bookRepository.load();
+        loanRepository.load();
+        reservationRepository.load();
+        loadBooks(bookService.getAllBooks());
         try {
 
             loanService.extendLoan(
@@ -495,7 +504,10 @@ public class StudentPanel extends JFrame {
         if (book == null) {
             return;
         }
-
+        bookRepository.load();
+        loanRepository.load();
+        reservationRepository.load();
+        loadBooks(bookService.getAllBooks());
         try {
 
             loanService.borrowBook(
@@ -531,7 +543,10 @@ public class StudentPanel extends JFrame {
         if (book == null) {
             return;
         }
-
+        bookRepository.load();
+        loanRepository.load();
+        reservationRepository.load();
+        loadBooks(bookService.getAllBooks());
         try {
 
             loanService.returnBook(
@@ -560,7 +575,10 @@ public class StudentPanel extends JFrame {
     }
 
     private void showMyLoans() {
-
+        bookRepository.load();
+        loanRepository.load();
+        reservationRepository.load();
+        loadBooks(bookService.getAllBooks());
         java.util.List<src.model.Loan> loans =
                 loanService.getActiveLoansByStudent(student);
 
