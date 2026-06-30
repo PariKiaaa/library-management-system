@@ -81,12 +81,11 @@ The project follows a layered architecture:
 ## Screenshots
 
 
-<img width="497" height="408" alt="image" src="https://github.com/user-attachments/assets/0688433e-5598-40b4-98ef-33ec0991131d" />
-<img width="1002" height="614" alt="image" src="https://github.com/user-attachments/assets/a4b17c32-1d80-4b28-b1f4-f01fbd198d77" />
-<img width="1195" height="705" alt="image" src="https://github.com/user-attachments/assets/cff0aed7-5e8d-4328-bcd9-17361f0265a0" />
-<img width="620" height="828" alt="image" src="https://github.com/user-attachments/assets/f73e0ef0-db1c-4350-a44f-47c6e4f3b17f" />
-
-<img width="1195" height="706" alt="image" src="https://github.com/user-attachments/assets/2f82ae0b-b8fe-4d1a-908e-d5f14ab9304b" />
+<img width="249" height="204" alt="image" src="https://github.com/user-attachments/assets/0688433e-5598-40b4-98ef-33ec0991131d" />
+<img width="501" height="307" alt="image" src="https://github.com/user-attachments/assets/a4b17c32-1d80-4b28-b1f4-f01fbd198d77" />
+<img width="598" height="353" alt="image" src="https://github.com/user-attachments/assets/cff0aed7-5e8d-4328-bcd9-17361f0265a0" />
+<img width="310" height="414" alt="image" src="https://github.com/user-attachments/assets/f73e0ef0-db1c-4350-a44f-47c6e4f3b17f" />
+<img width="598" height="353" alt="image" src="https://github.com/user-attachments/assets/2f82ae0b-b8fe-4d1a-908e-d5f14ab9304b" />
 
 
 
