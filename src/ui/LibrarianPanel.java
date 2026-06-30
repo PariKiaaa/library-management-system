@@ -173,7 +173,7 @@ public class LibrarianPanel extends JFrame {
         panel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 
         booksTableModel = new DefaultTableModel(
-                new Object[]{"تصویر", "شابک", "عنوان", "نویسنده", "ناشر", "سال انتشار", "موضوع", "تعداد کل", "موجود"}, 0) {
+                new Object[]{"تصویر", "شابک", "عنوان", "نویسنده", "ناشر", "سال", "موضوع", "تعداد کل", "موجود"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;

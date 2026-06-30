@@ -406,7 +406,7 @@ private JButton createGoogleSearchButton() {
         
         try {
             // ساخت عبارت جستجو
-            String searchQuery = "کتاب " + bookTitle + " جلد";
+            String searchQuery = "کتاب " + bookTitle;
             String encodedQuery = URLEncoder.encode(searchQuery, "UTF-8");
             String googleImageUrl = "https://www.google.com/search?q=" + encodedQuery + "&tbm=isch";
             
