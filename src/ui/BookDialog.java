@@ -229,7 +229,7 @@ public class BookDialog extends JDialog {
         categoryLabel.setForeground(Color.BLACK);
         panel.add(categoryLabel, gbc);
 
-        categoryCombo = new JComboBox<>(new String[]{"داستانی", "علمی", "فناوری", "تاریخی", "زندگینامه", "ریاضی", "ادبیات", "سایر"});
+        categoryCombo = new JComboBox<>(new String[]{"عاشقانه","جنایی","ترسناک","فانتزی","تاریخی","زندگینامه","علمی","سایر"});
         categoryCombo.setFont(new Font("Tahoma", Font.PLAIN, 18));
         categoryCombo.setForeground(Color.BLACK);
         categoryCombo.setBackground(Color.WHITE);

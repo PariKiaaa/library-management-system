@@ -98,34 +98,6 @@ public class BookService {
         return bookRepository.findByIsbn(isbn);
     }
 
-    public String getBookStatus(String isbn) {
-        if (isbn == null || isbn.trim().isEmpty()) {
-            return "شابک نامعتبر است.";
-        }
-
-        Book book = bookRepository.findByIsbn(isbn);
-        if (book == null) {
-            return "کتاب یافت نشد.";
-        }
-
-        StringBuilder status = new StringBuilder();
-        status.append("عنوان: ").append(book.getTitle()).append("\n");
-        status.append("نویسنده: ").append(book.getAuthor()).append("\n");
-        status.append("ناشر: ").append(book.getPublisher()).append("\n");
-        status.append("سال انتشار: ").append(book.getYear()).append("\n");
-        status.append("دسته‌بندی: ").append(book.getCategory()).append("\n");
-        status.append("تعداد کل: ").append(book.getTotalCopies()).append("\n");
-        status.append("تعداد موجود: ").append(book.getAvailableCopies()).append("\n");
-
-        if (book.getAvailableCopies() > 0) {
-            status.append("وضعیت: موجود");
-        } else {
-            status.append("وضعیت: ناموجود");
-        }
-
-        return status.toString();
-    }
-
     private void validateBookFields(Book book) throws ValidationException {
         if (book.getTitle() == null || book.getTitle().trim().isEmpty()) {
             throw new ValidationException("عنوان نمی‌تواند خالی باشد.");

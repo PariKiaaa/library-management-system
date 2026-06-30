@@ -81,17 +81,11 @@ public class ReservationRepository {
         return null;
     }
 
-    /**
-     * Removes a reservation.
-     */
     public void remove(Reservation reservation) {
         reservations.remove(reservation);
         save();
     }
 
-    /**
-     * Returns all reservations.
-     */
     public List<Reservation> getReservations() {
         return reservations;
     }

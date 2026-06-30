@@ -1414,7 +1414,7 @@ private void writeCsvFile(String filePath, List<String[]> data) throws IOExcepti
             // جایگزینی کاما با ویرگول برای جلوگیری از مشکلات CSV
             String[] escapedRow = new String[row.length];
             for (int i = 0; i < row.length; i++) {
-                // اگر مقدار شامل کاما یا نقل قول باشه، داخل نقل قول قرار می‌دیم
+                // اگر مقدار شامل کاما یا نقل قول باشه، داخل نقل قول قرار میدیم
                 String value = row[i];
                 if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
                     value = value.replace("\"", "\"\"");

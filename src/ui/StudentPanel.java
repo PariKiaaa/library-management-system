@@ -246,7 +246,6 @@ public class StudentPanel extends JFrame {
         searchField.addActionListener(e -> searchBook());
         panel.add(searchField);
 
-        // کامبوباکس انتخاب معیار جستجو
         searchCombo = new JComboBox<>(new String[]{"عنوان", "نویسنده", "موضوع", "سال"});
         searchCombo.setFont(new Font("Tahoma", Font.PLAIN, 16));
         searchCombo.setBackground(Color.WHITE);
@@ -258,6 +257,7 @@ public class StudentPanel extends JFrame {
         searchButton.addActionListener(e -> searchBook());
         panel.add(searchButton);
 
+        // تعداد نتایج
         searchResultLabel = new JLabel("تعداد نتایج: ۰");
         searchResultLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
         searchResultLabel.setForeground(new Color(143, 143, 143));

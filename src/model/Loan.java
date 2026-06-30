@@ -46,10 +46,7 @@ public class Loan implements Serializable {
         this.dueDate = loanDate.plusDays(BASE_LOAN_DAYS);
     }
 
-/**
-      * Requests an extension for the loan (librarian must approve).
-      * @throws IllegalStateException if already extended
-      */
+
     public void extend() {
         if (extended) {
             throw new IllegalStateException("این امانت قبلاً تمدید شده است");
@@ -57,10 +54,7 @@ public class Loan implements Serializable {
         this.extensionRequested = true;
     }
 
-    /**
-      * Approves a pending extension request.
-      * @throws IllegalStateException if no extension was requested
-      */
+
     public void approveExtension() {
         if (!extensionRequested) {
             throw new IllegalStateException("درخواست تمدیدی در انتظار نیست");
@@ -71,9 +65,6 @@ public class Loan implements Serializable {
         this.dueDate = this.dueDate.plusDays(EXTENSION_DAYS);
     }
 
-    /**
-     * Marks the book as returned.
-     */
     public void returnBook() {
         if (actualReturnDate != null) {
             throw new IllegalStateException("کتاب قبلاً بازگردانده شده است");
@@ -98,11 +89,6 @@ public class Loan implements Serializable {
         return Math.max(0, ChronoUnit.DAYS.between(dueDate, LocalDate.now()));
     }
 
-    /**
-     * Calculates the late fine.
-     * @param dailyFine fine per day
-     * @return total fine in Rials
-     */
     public int calculateFine(int dailyFine) {
         if (dailyFine <= 0) {
             throw new IllegalArgumentException("جریمه روزانه باید مثبت باشد");
