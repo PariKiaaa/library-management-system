@@ -17,25 +17,23 @@ public class BookRepository {
 
     private List<Book> books;
 
+    // Constructor - initializes the book list and loads data from file
     public BookRepository() {
         books = new ArrayList<>();
         load();
     }
 
-    /**
-     * Adds a new book.
-     */
+    // Adds a new book to the repository and saves to file
     public void add(Book book) {
         books.add(book);
 
         save();
     }
 
-    /**
-     * Removes a book.
-     */
+    // Removes a book by ISBN and saves to file
     public boolean remove(String isbn) {
 
+        // Find and remove the book with matching ISBN
         for (Book book : books) {
             if (book.getIsbn().equals(isbn)) {
                 books.remove(book);
@@ -47,9 +45,7 @@ public class BookRepository {
         return false;
     }
 
-    /**
-     * Searches books by title.
-     */
+    // Searches for books by title (case-insensitive partial match)
     public List<Book> searchByTitle(String title) {
 
         List<Book> result = new ArrayList<>();
@@ -66,9 +62,7 @@ public class BookRepository {
         return result;
     }
 
-    /**
-     * Searches books by author.
-     */
+    // Searches for books by author (case-insensitive partial match)
     public List<Book> searchByAuthor(String author) {
 
         List<Book> result = new ArrayList<>();
@@ -85,9 +79,7 @@ public class BookRepository {
         return result;
     }
 
-    /**
-     * Searches books by category.
-     */
+    // Searches for books by category (case-insensitive partial match)
     public List<Book> searchByCategory(String category) {
 
         List<Book> result = new ArrayList<>();
@@ -104,9 +96,7 @@ public class BookRepository {
         return result;
     }
 
-    /**
-     * Saves books to file.
-     */
+    // Saves the current book list to file using serialization
     public void save() {
 
         try {
@@ -117,14 +107,13 @@ public class BookRepository {
 
     }
 
-    /**
-     * Loads books from file.
-     */
+    // Loads the book list from file using deserialization
     @SuppressWarnings("unchecked")
     public void load() {
 
         File file = new File(FILE_NAME);
 
+        // If file doesn't exist, return with empty list
         if (!file.exists()) {
             return;
         }
@@ -138,13 +127,12 @@ public class BookRepository {
 
     }
 
-    /**
-     * Returns all books.
-     */
+    // Returns all books in the repository
     public List<Book> getBooks() {
         return books;
     }
 
+    // Finds a book by its ISBN
     public Book findByIsbn(String isbn) {
 
         for (Book book : books) {

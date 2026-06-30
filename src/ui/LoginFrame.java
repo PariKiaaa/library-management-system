@@ -12,18 +12,22 @@ import java.awt.*;
  */
 public class LoginFrame extends JFrame {
 
+    // Login form fields
     private final JTextField usernameField;
     private final JPasswordField passwordField;
 
+    // Role selection radio buttons
     private final JRadioButton studentRadio;
     private final JRadioButton librarianRadio;
 
+    // Action buttons
     private final JButton loginButton;
     private final JButton registerButton;
 
+    // Service
     private final AuthenticationService authenticationService;
 
-    // Colors
+    // UI Colors
     private final Color PRIMARY_COLOR = new Color(255, 107, 107);
     // private final Color SECONDARY_COLOR = new Color(78, 205, 196);
     private final Color BACKGROUND_COLOR = new Color(245, 247, 250);
@@ -31,6 +35,7 @@ public class LoginFrame extends JFrame {
     // private final Color BUTTON_COLOR = new Color(52, 152, 219);
     // private final Color TEXT_COLOR = Color.BLACK;
 
+    // Constructor - Initialize login UI
     public LoginFrame() {
         authenticationService = new AuthenticationService();
 
@@ -40,6 +45,7 @@ public class LoginFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setBackground(BACKGROUND_COLOR);
 
+        // Apply Nimbus look and feel
         try {
             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
             UIManager.put("nimbusBase", PRIMARY_COLOR);
@@ -80,6 +86,7 @@ public class LoginFrame extends JFrame {
         
         add(headerPanel, BorderLayout.NORTH);
 
+        // Center panel with form fields
         JPanel centerPanel = new JPanel(new GridBagLayout());
         centerPanel.setBackground(BACKGROUND_COLOR);
         centerPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
@@ -90,6 +97,7 @@ public class LoginFrame extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.EAST;
 
+        // Create form labels
         JLabel usernameLabel = new JLabel("شناسه کاربری:");
         usernameLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
         usernameLabel.setForeground(Color.BLACK);
@@ -97,6 +105,7 @@ public class LoginFrame extends JFrame {
         passwordLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
         passwordLabel.setForeground(Color.BLACK);
 
+        // Create form fields
         usernameField = new JTextField(15);
         usernameField.setFont(new Font("Tahoma", Font.PLAIN, 16));
         usernameField.setForeground(Color.BLACK);
@@ -115,6 +124,7 @@ public class LoginFrame extends JFrame {
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
 
+        // Role selection radio buttons
         studentRadio = new JRadioButton("دانشجو", true);
         studentRadio.setFont(new Font("Tahoma", Font.PLAIN, 16));
         studentRadio.setForeground(Color.BLACK);
@@ -127,16 +137,20 @@ public class LoginFrame extends JFrame {
         librarianRadio.setBackground(BACKGROUND_COLOR);
         librarianRadio.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 
+        // Group radio buttons
         ButtonGroup group = new ButtonGroup();
         group.add(studentRadio);
         group.add(librarianRadio);
 
+        // Role panel containing radio buttons
         JPanel rolePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         rolePanel.setBackground(BACKGROUND_COLOR);
         rolePanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         rolePanel.add(studentRadio);
         rolePanel.add(librarianRadio);
 
+        // Add components to form using grid bag layout
+        // Username row
         gbc.gridx = 0;
         gbc.gridy = 0;
         centerPanel.add(usernameLabel, gbc);
@@ -145,6 +159,7 @@ public class LoginFrame extends JFrame {
         gbc.weightx = 1.0;
         centerPanel.add(usernameField, gbc);
 
+        // Password row
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.weightx = 0;
@@ -154,6 +169,7 @@ public class LoginFrame extends JFrame {
         gbc.weightx = 1.0;
         centerPanel.add(passwordField, gbc);
 
+        // Role row
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.weightx = 0;
@@ -168,6 +184,7 @@ public class LoginFrame extends JFrame {
 
         add(centerPanel, BorderLayout.CENTER);
 
+        // Button panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
         buttonPanel.setBackground(HEADER_COLOR);
         buttonPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -181,14 +198,15 @@ public class LoginFrame extends JFrame {
 
         add(buttonPanel, BorderLayout.SOUTH);
 
+        // Add action listeners
         loginButton.addActionListener(e -> login());
-
         registerButton.addActionListener(e -> {
             new RegisterFrame().setVisible(true);
             dispose();
         });
     }
 
+    // Create styled button with hover effect
     private JButton createStyledButton(String text, Color color) {
         JButton button = new JButton(text);
         button.setFont(new Font("Tahoma", Font.BOLD, 16));
@@ -202,6 +220,7 @@ public class LoginFrame extends JFrame {
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         
+        // Hover effect
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(color.darker());
@@ -214,25 +233,23 @@ public class LoginFrame extends JFrame {
         return button;
     }
 
+    // Handle user login
     private void login() {
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword());
 
         try {
+            // Login as Student
             if (studentRadio.isSelected()) {
-
-                Student student =
-                        authenticationService.loginStudent(username, password);
-
+                Student student = authenticationService.loginStudent(username, password);
                 new StudentPanel(student).setVisible(true);
-
             } else {
-
+                // Login as Librarian
                 authenticationService.loginLibrarian(username, password);
-
                 new LibrarianPanel().setVisible(true);
             }
 
+            // Close login window on successful login
             dispose();
 
         } catch (AuthenticationException ex) {

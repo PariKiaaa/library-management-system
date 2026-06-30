@@ -19,18 +19,19 @@ public class LoanRepository {
 
     private List<Loan> loans;
 
+    // Constructor - initializes the loan list and loads data from file
     public LoanRepository() {
         loans = new ArrayList<>();
         load();
     }
 
+    // Adds a new loan to the repository and saves to file
     public void add(Loan loan) {
         loans.add(loan);
         save();
     }
-    /**
-     * Saves all loans.
-     */
+
+    // Saves the current loan list to file using serialization
     public void save() {
 
         try {
@@ -41,14 +42,13 @@ public class LoanRepository {
 
     }
 
-    /**
-     * Loads loans from file.
-     */
+    // Loads the loan list from file using deserialization
     @SuppressWarnings("unchecked")
     public void load() {
 
         File file = new File(FILE_NAME);
 
+        // If file doesn't exist, return with empty list
         if (!file.exists()) {
             return;
         }
@@ -65,16 +65,12 @@ public class LoanRepository {
 
     }
 
-    /**
-     * Returns all loans.
-     */
+    // Returns all loans in the repository
     public List<Loan> getLoans() {
         return loans;
     }
 
-    /**
-     * Returns all active loans of a student.
-     */
+    // Returns all active loans (not returned) for a specific student
     public List<Loan> getLoansByStudent(Student student) {
 
         List<Loan> result = new ArrayList<>();
@@ -90,9 +86,7 @@ public class LoanRepository {
         return result;
     }
 
-    /**
-     * Returns all active loans of a book.
-     */
+    // Returns all active loans (not returned) for a specific book
     public List<Loan> getLoansByBook(Book book) {
 
         List<Loan> result = new ArrayList<>();

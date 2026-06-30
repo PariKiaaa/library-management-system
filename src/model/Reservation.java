@@ -6,11 +6,13 @@ import java.time.LocalDate;
  * Represents a reservation request for a book.
  */
 public class Reservation implements Serializable {
+    // Reservation attributes
     private Student student;
     private Book book;
     private LocalDate requestDate;
     private boolean approved;
 
+    // Constructor with all fields
     public Reservation(Student student, Book book, LocalDate requestDate, boolean approved) {
         this.student = student;
         this.book = book;
@@ -18,6 +20,7 @@ public class Reservation implements Serializable {
         this.approved = approved;
     }
 
+    // Getters and setters for all attributes
     public Student getStudent() {
         return student;
     }
@@ -50,6 +53,7 @@ public class Reservation implements Serializable {
         this.approved = approved;
     }
 
+    // String representation of the reservation
     @Override
     public String toString() {
         return "رزرو{" +

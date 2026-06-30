@@ -9,15 +9,18 @@ import java.util.Objects;
  */
 public class Loan implements Serializable {
         
+    // Constants for loan duration
     private static final int BASE_LOAN_DAYS = 7;
     private static final int EXTENSION_DAYS = 7;
 
+    // Loan attributes
     private Student student;
     private Book book;
     private LocalDate loanDate, dueDate, actualReturnDate, extensionDate;
     private boolean extended;
     private boolean extensionRequested;
 
+    // Constructor - creates a new loan with base due date
     public Loan(Student student, Book book, LocalDate loanDate) {
         this.student = student;
         this.book = book;
@@ -41,12 +44,14 @@ public class Loan implements Serializable {
 
     public void setStudent(Student student) { this.student = student; }
     public void setBook(Book book) { this.book = book; }
+    
+    // Updates loan date and recalculates due date
     public void setLoanDate(LocalDate loanDate) { 
         this.loanDate = loanDate;
         this.dueDate = loanDate.plusDays(BASE_LOAN_DAYS);
     }
 
-
+    // Request extension for this loan
     public void extend() {
         if (extended) {
             throw new IllegalStateException("این امانت قبلاً تمدید شده است");
@@ -54,7 +59,7 @@ public class Loan implements Serializable {
         this.extensionRequested = true;
     }
 
-
+    // Approve the extension request
     public void approveExtension() {
         if (!extensionRequested) {
             throw new IllegalStateException("درخواست تمدیدی در انتظار نیست");
@@ -65,23 +70,27 @@ public class Loan implements Serializable {
         this.dueDate = this.dueDate.plusDays(EXTENSION_DAYS);
     }
 
+    // Mark the book as returned
     public void returnBook() {
         if (actualReturnDate != null) {
             throw new IllegalStateException("کتاب قبلاً بازگردانده شده است");
         }
         this.actualReturnDate = LocalDate.now();
-        // Increase available copies
+        // Increase available copies in the book
         book.setAvailableCopies(book.getAvailableCopies() + 1);
     }
 
+    // Check if the book has been returned
     public boolean isReturned() {
         return actualReturnDate != null;
     }
 
+    // Check if the loan is overdue
     public boolean isOverdue() {
         return !isReturned() && LocalDate.now().isAfter(dueDate);
     }
 
+    // Calculate the number of late days
     public long getLateDays() {
         if (isReturned()) {
             return Math.max(0, ChronoUnit.DAYS.between(dueDate, actualReturnDate));
@@ -89,6 +98,7 @@ public class Loan implements Serializable {
         return Math.max(0, ChronoUnit.DAYS.between(dueDate, LocalDate.now()));
     }
 
+    // Calculate the fine amount based on daily fine rate
     public int calculateFine(int dailyFine) {
         if (dailyFine <= 0) {
             throw new IllegalArgumentException("جریمه روزانه باید مثبت باشد");
@@ -102,6 +112,7 @@ public class Loan implements Serializable {
         return (int) (lateDays * dailyFine);
     }
 
+    // String representation of the loan
     @Override
     public String toString() {
         return "امانت{" +

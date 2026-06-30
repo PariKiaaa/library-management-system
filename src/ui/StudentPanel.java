@@ -64,10 +64,12 @@ public class StudentPanel extends JFrame {
 
         this.student = student;
 
+        // Initialize repositories
         bookRepository = new BookRepository();
         loanRepository = new LoanRepository();
         reservationRepository = new ReservationRepository();
 
+        // Initialize services
         bookService = new BookService(bookRepository);
         loanService = new LoanService(bookRepository, loanRepository);
         reservationService = new ReservationService(
@@ -76,6 +78,7 @@ public class StudentPanel extends JFrame {
                 loanService
         );
 
+        // Setup UI components
         initializeFrame();
         initializeTable();
         initializeTopPanel();
@@ -83,6 +86,7 @@ public class StudentPanel extends JFrame {
         loadBooks(bookService.getAllBooks());
     }
 
+    // Initialize main frame
     private void initializeFrame() {
 
         setTitle("پنل دانشجو - " + student.getFirstName());
@@ -91,6 +95,7 @@ public class StudentPanel extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setBackground(BACKGROUND_COLOR);
 
+        // Apply Nimbus look and feel with custom colors
         try {
             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
             UIManager.put("nimbusBase", PRIMARY_COLOR);
@@ -132,7 +137,7 @@ public class StudentPanel extends JFrame {
         headerLabel.setHorizontalAlignment(SwingConstants.CENTER);
         headerPanel.add(headerLabel, BorderLayout.CENTER);
         
-        // تاریخ امروز
+        // Today's date
         JLabel dateLabel = new JLabel();
         dateLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
         dateLabel.setForeground(Color.BLACK);
@@ -151,9 +156,10 @@ public class StudentPanel extends JFrame {
         add(headerPanel, BorderLayout.NORTH);
     }
 
+    // Initialize the book table
     private void initializeTable() {
 
-        // ===== ساختار جدول مانند پنل کتابدار =====
+        // Table structure similar to librarian panel
         tableModel = new DefaultTableModel(
                 new Object[]{"تصویر", "شابک", "عنوان", "نویسنده", "ناشر", "سال", "موضوع", "تعداد کل", "موجود"}, 0) {
             @Override
@@ -172,6 +178,7 @@ public class StudentPanel extends JFrame {
         bookTable.setGridColor(new Color(236, 240, 241));
         bookTable.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         
+        // Custom cell renderer for alternating row colors
         bookTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -188,16 +195,20 @@ public class StudentPanel extends JFrame {
             }
         });
         
+        // Set custom renderer for image column
         bookTable.getColumnModel().getColumn(0).setCellRenderer(new ImageRenderer());
         
+        // Add sorter with custom configurations
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
         bookTable.setRowSorter(sorter);
 
+        // Disable sorting for specific columns
         sorter.setSortable(0, false); // تصویر
         sorter.setSortable(6, false); // موضوع
         sorter.setSortable(7, false); // تعداد کل
         sorter.setSortable(8, false); // موجود
         
+        // Custom comparator for year column
         sorter.setComparator(5, (o1, o2) -> {
             try {
                 Integer year1 = Integer.parseInt(o1.toString());
@@ -208,6 +219,7 @@ public class StudentPanel extends JFrame {
             }
         });
         
+        // Style table header
         JTableHeader header = bookTable.getTableHeader();
         header.setBackground(HEADER_COLOR);
         header.setForeground(Color.BLACK);
@@ -215,6 +227,7 @@ public class StudentPanel extends JFrame {
         header.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         ((DefaultTableCellRenderer)header.getDefaultRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
         
+        // Set column widths
         setColumnSizes(bookTable, new int[]{60, 80, 150, 120, 100, 70, 100, 90, 110});
 
         JScrollPane scrollPane = new JScrollPane(bookTable);
@@ -222,6 +235,7 @@ public class StudentPanel extends JFrame {
         add(scrollPane, BorderLayout.CENTER);
     }
 
+    // Initialize top panel with search components
     private void initializeTopPanel() {
 
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
@@ -242,7 +256,7 @@ public class StudentPanel extends JFrame {
             BorderFactory.createLineBorder(PRIMARY_COLOR, 1),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
-        // جستجو با Enter
+        // Search on Enter key
         searchField.addActionListener(e -> searchBook());
         panel.add(searchField);
 
@@ -257,7 +271,7 @@ public class StudentPanel extends JFrame {
         searchButton.addActionListener(e -> searchBook());
         panel.add(searchButton);
 
-        // تعداد نتایج
+        // Result count label
         searchResultLabel = new JLabel("تعداد نتایج: ۰");
         searchResultLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
         searchResultLabel.setForeground(new Color(143, 143, 143));
@@ -267,6 +281,7 @@ public class StudentPanel extends JFrame {
         add(panel, BorderLayout.NORTH);
     }
 
+    // Initialize bottom panel with action buttons
     private void initializeBottomPanel() {
 
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
@@ -302,6 +317,7 @@ public class StudentPanel extends JFrame {
         add(panel, BorderLayout.SOUTH);
     }
 
+    // Create styled button with hover effect
     private JButton createStyledButton(String text, Color color) {
         JButton button = new JButton(text);
         button.setFont(new Font("Tahoma", Font.BOLD, 16));
@@ -327,12 +343,14 @@ public class StudentPanel extends JFrame {
         return button;
     }
 
+    // Set preferred column widths
     private void setColumnSizes(JTable table, int[] widths) {
         for (int i = 0; i < widths.length && i < table.getColumnCount(); i++) {
             table.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
         }
     }
 
+    // Custom cell renderer for image column
     private class ImageRenderer extends DefaultTableCellRenderer {
         private static final int IMAGE_WIDTH = 40;
         private static final int IMAGE_HEIGHT = 55;
@@ -368,6 +386,7 @@ public class StudentPanel extends JFrame {
         }
     }
 
+    // Load books into table
     private void loadBooks(List<Book> books) {
 
         tableModel.setRowCount(0);
@@ -388,18 +407,19 @@ public class StudentPanel extends JFrame {
 
         }
         
-        // آپدیت تعداد نتایج
+        // Update result count
         if (searchResultLabel != null) {
             searchResultLabel.setText("تعداد نتایج: " + tableModel.getRowCount());
         }
         
-        // ریست سورتر بعد از بارگذاری
+        // Reset sorter after loading
         TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) bookTable.getRowSorter();
         if (sorter != null) {
             sorter.setRowFilter(null);
         }
     }
 
+    // Load cover image from file
     private ImageIcon loadCoverImage(String imagePath) {
         if (imagePath == null || imagePath.trim().isEmpty()) {
             return null;
@@ -419,6 +439,7 @@ public class StudentPanel extends JFrame {
         }
     }
 
+    // Search for books based on selected criteria
     private void searchBook() {
 
         String keyword = searchField.getText().trim();
@@ -464,13 +485,14 @@ public class StudentPanel extends JFrame {
 
         loadBooks(results);
         
-        // ریست سورتر بعد از جستجو
+        // Reset sorter after search
         TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) bookTable.getRowSorter();
         if (sorter != null) {
             sorter.setRowFilter(null);
         }
     }
     
+    // Reserve selected book
     private void reserveBook() {
 
         Book book = getSelectedBook();
@@ -508,6 +530,7 @@ public class StudentPanel extends JFrame {
 
     }
 
+    // Extend loan period for selected book
     private void extendLoan() {
 
         Book book = getSelectedBook();
@@ -553,6 +576,7 @@ public class StudentPanel extends JFrame {
 
     }
 
+    // Borrow selected book
     private void loanBook() {
 
         Book book = getSelectedBook();
@@ -592,6 +616,7 @@ public class StudentPanel extends JFrame {
 
     }
 
+    // Return selected book
     private void returnBook() {
 
         Book book = getSelectedBook();
@@ -630,6 +655,7 @@ public class StudentPanel extends JFrame {
 
     }
 
+    // Display current loans for the student
     private void showMyLoans() {
         bookRepository.load();
         loanRepository.load();
@@ -695,6 +721,7 @@ public class StudentPanel extends JFrame {
 
     }
 
+    // Get the currently selected book from table
     private Book getSelectedBook() {
 
         int row = bookTable.getSelectedRow();

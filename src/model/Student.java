@@ -10,11 +10,13 @@ public class Student extends User {
 
     private String studentId;
 
+    // Constructor with all fields
     public Student(String firstName, String lastName, String email, String password, String studentId) {
         super(firstName, lastName, email, password);
         this.studentId = studentId;
     }
 
+    // Getter and setter for student ID
     public String getStudentId() {
         return studentId;
     }
@@ -23,6 +25,7 @@ public class Student extends User {
         this.studentId = studentId;
     }
 
+    // Equality check based on student ID
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -31,11 +34,13 @@ public class Student extends User {
         return Objects.equals(studentId, student.studentId);
     }
 
+    // Hash code based on student ID
     @Override
     public int hashCode() {
         return Objects.hash(studentId);
     }
 
+    // String representation of the student
     @Override
     public String toString() {
         return "دانشجو{" +

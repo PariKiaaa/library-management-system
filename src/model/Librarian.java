@@ -10,11 +10,13 @@ public class Librarian extends User {
 
     private String personnelCode;
 
+    // Constructor with all fields
     public Librarian(String firstName, String lastName, String email, String password, String personnelCode) {
         super(firstName, lastName, email, password);
         this.personnelCode = personnelCode;
     }
 
+    // Getter and setter for personnel code
     public String getPersonnelCode() {
         return personnelCode;
     }
@@ -23,6 +25,7 @@ public class Librarian extends User {
         this.personnelCode = personnelCode;
     }
 
+    // Equality check based on personnel code
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -31,11 +34,13 @@ public class Librarian extends User {
         return Objects.equals(personnelCode, librarian.personnelCode);
     }
 
+    // Hash code based on personnel code
     @Override
     public int hashCode() {
         return Objects.hash(personnelCode);
     }
 
+    // String representation of the librarian
     @Override
     public String toString() {
         return "کتابدار{" +

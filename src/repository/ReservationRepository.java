@@ -19,18 +19,19 @@ public class ReservationRepository {
 
     private List<Reservation> reservations;
 
+    // Constructor - initializes the reservation list and loads data from file
     public ReservationRepository() {
         reservations = new ArrayList<>();
         load();
     }
 
+    // Adds a new reservation to the repository and saves to file
     public void add(Reservation reservation) {
         reservations.add(reservation);
         save();
     }
-    /**
-     * Saves reservations to file.
-     */
+
+    // Saves the current reservation list to file using serialization
     public void save() {
 
         try {
@@ -41,14 +42,13 @@ public class ReservationRepository {
 
     }
 
-    /**
-     * Loads reservations from file.
-     */
+    // Loads the reservation list from file using deserialization
     @SuppressWarnings("unchecked")
     public void load() {
 
         File file = new File(FILE_NAME);
 
+        // If file doesn't exist, return with empty list
         if (!file.exists()) {
             return;
         }
@@ -65,6 +65,7 @@ public class ReservationRepository {
 
     }
 
+    // Finds a pending (not approved) reservation for a specific student and book
     public Reservation findPendingReservation(Student student, Book book) {
 
         for (Reservation reservation : reservations) {
@@ -81,11 +82,13 @@ public class ReservationRepository {
         return null;
     }
 
+    // Removes a reservation from the repository and saves to file
     public void remove(Reservation reservation) {
         reservations.remove(reservation);
         save();
     }
 
+    // Returns all reservations in the repository
     public List<Reservation> getReservations() {
         return reservations;
     }

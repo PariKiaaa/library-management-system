@@ -16,23 +16,28 @@ import java.awt.*;
  */
 public class RegisterFrame extends JFrame {
 
+    // Form fields
     private final JTextField firstNameField;
     private final JTextField lastNameField;
     private final JTextField emailField;
     private final JTextField idField;
     private final JPasswordField passwordField;
 
+    // Role selection radio buttons
     private final JRadioButton studentRadio;
     private final JRadioButton librarianRadio;
 
+    // Action buttons
     private final JButton registerButton;
     private final JButton backButton;
 
+    // Dynamic label for ID field
     private final JLabel idLabel;
 
+    // Service
     private final AuthenticationService authenticationService;
 
-    // Colors
+    // UI Colors
     private final Color PRIMARY_COLOR = new Color(255, 107, 107);
     // private final Color SECONDARY_COLOR = new Color(78, 205, 196);
     private final Color BACKGROUND_COLOR = new Color(245, 247, 250);
@@ -40,6 +45,7 @@ public class RegisterFrame extends JFrame {
     // private final Color BUTTON_COLOR = new Color(52, 152, 219);
     // private final Color TEXT_COLOR = Color.BLACK;
 
+    // Constructor - Initialize UI
     public RegisterFrame() {
 
         authenticationService = new AuthenticationService();
@@ -50,6 +56,7 @@ public class RegisterFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setBackground(BACKGROUND_COLOR);
 
+        // Apply Nimbus look and feel
         try {
             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
             UIManager.put("nimbusBase", PRIMARY_COLOR);
@@ -90,6 +97,7 @@ public class RegisterFrame extends JFrame {
         
         add(headerPanel, BorderLayout.NORTH);
 
+        // Form Panel with GridBagLayout
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setBackground(BACKGROUND_COLOR);
         formPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
@@ -100,6 +108,7 @@ public class RegisterFrame extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.EAST;
 
+        // Initialize form fields
         firstNameField = new JTextField(15);
         firstNameField.setFont(new Font("Tahoma", Font.PLAIN, 16));
         firstNameField.setForeground(Color.BLACK);
@@ -145,6 +154,7 @@ public class RegisterFrame extends JFrame {
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
 
+        // Role selection radio buttons
         studentRadio = new JRadioButton("دانشجو", true);
         studentRadio.setFont(new Font("Tahoma", Font.PLAIN, 16));
         studentRadio.setForeground(Color.BLACK);
@@ -157,25 +167,31 @@ public class RegisterFrame extends JFrame {
         librarianRadio.setOpaque(false);
         librarianRadio.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 
+        // Group radio buttons
         ButtonGroup group = new ButtonGroup();
         group.add(studentRadio);
         group.add(librarianRadio);
 
+        // Label that changes based on role selection
         idLabel = new JLabel("شماره دانشجویی:");
         idLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
         idLabel.setForeground(Color.BLACK);
 
+        // Update ID label based on selected role
         studentRadio.addActionListener(e -> idLabel.setText("شماره دانشجویی:"));
         librarianRadio.addActionListener(e -> idLabel.setText("کد پرسنلی:"));
 
+        // Role panel containing radio buttons
         JPanel rolePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         rolePanel.setOpaque(false);
         rolePanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         rolePanel.add(studentRadio);
         rolePanel.add(librarianRadio);
 
+        // Add components to form using grid bag layout
         int row = 0;
 
+        // First Name
         JLabel firstNameLabel = new JLabel("نام:");
         firstNameLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
         firstNameLabel.setForeground(Color.BLACK);
@@ -188,6 +204,7 @@ public class RegisterFrame extends JFrame {
         gbc.weightx = 1.0;
         formPanel.add(firstNameField, gbc);
 
+        // Last Name
         row++;
         gbc.gridx = 0;
         gbc.gridy = row;
@@ -201,6 +218,7 @@ public class RegisterFrame extends JFrame {
         gbc.weightx = 1.0;
         formPanel.add(lastNameField, gbc);
 
+        // Email
         row++;
         gbc.gridx = 0;
         gbc.gridy = row;
@@ -214,6 +232,7 @@ public class RegisterFrame extends JFrame {
         gbc.weightx = 1.0;
         formPanel.add(emailField, gbc);
 
+        // Password
         row++;
         gbc.gridx = 0;
         gbc.gridy = row;
@@ -227,6 +246,7 @@ public class RegisterFrame extends JFrame {
         gbc.weightx = 1.0;
         formPanel.add(passwordField, gbc);
 
+        // ID (Student ID or Personnel Code)
         row++;
         gbc.gridx = 0;
         gbc.gridy = row;
@@ -237,6 +257,7 @@ public class RegisterFrame extends JFrame {
         gbc.weightx = 1.0;
         formPanel.add(idField, gbc);
 
+        // Role
         row++;
         gbc.gridx = 0;
         gbc.gridy = row;
@@ -252,6 +273,7 @@ public class RegisterFrame extends JFrame {
 
         add(formPanel, BorderLayout.CENTER);
 
+        // Button panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
         buttonPanel.setBackground(HEADER_COLOR);
         buttonPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -265,14 +287,15 @@ public class RegisterFrame extends JFrame {
 
         add(buttonPanel, BorderLayout.SOUTH);
 
+        // Add action listeners
         registerButton.addActionListener(e -> register());
-
         backButton.addActionListener(e -> {
             new LoginFrame().setVisible(true);
             dispose();
         });
     }
 
+    // Create styled button with hover effect
     private JButton createStyledButton(String text, Color color) {
         JButton button = new JButton(text);
         button.setFont(new Font("Tahoma", Font.BOLD, 16));
@@ -286,6 +309,7 @@ public class RegisterFrame extends JFrame {
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         
+        // Hover effect
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(color.darker());
@@ -298,14 +322,17 @@ public class RegisterFrame extends JFrame {
         return button;
     }
 
+    // Handle user registration
     private void register() {
 
+        // Get form data
         String firstName = firstNameField.getText().trim();
         String lastName = lastNameField.getText().trim();
         String email = emailField.getText().trim();
         String password = new String(passwordField.getPassword());
         String id = idField.getText().trim();
 
+        // Validate all fields are filled
         if (firstName.isEmpty()
                 || lastName.isEmpty()
                 || email.isEmpty()
@@ -320,6 +347,7 @@ public class RegisterFrame extends JFrame {
             return;
         }
 
+        // Validate email format
         if (!ValidationUtil.isValidEmail(email)) {
             JOptionPane.showMessageDialog(
                     this,
@@ -329,6 +357,7 @@ public class RegisterFrame extends JFrame {
             return;
         }
 
+        // Validate password strength
         if (!ValidationUtil.isValidPassword(password)) {
             JOptionPane.showMessageDialog(
                     this,
@@ -340,8 +369,10 @@ public class RegisterFrame extends JFrame {
 
         try {
 
+            // Register as Student
             if (studentRadio.isSelected()) {
 
+                // Validate student ID format
                 if (!ValidationUtil.isValidStudentId(id)) {
                     JOptionPane.showMessageDialog(
                             this,
@@ -362,7 +393,7 @@ public class RegisterFrame extends JFrame {
                 authenticationService.registerStudent(student);
 
             } else {
-
+                // Register as Librarian
                 Librarian librarian = new Librarian(
                         firstName,
                         lastName,
@@ -374,6 +405,7 @@ public class RegisterFrame extends JFrame {
                 authenticationService.registerLibrarian(librarian);
             }
 
+            // Success message and redirect to login
             JOptionPane.showMessageDialog(
                     this,
                     "ثبت‌نام با موفقیت انجام شد.");

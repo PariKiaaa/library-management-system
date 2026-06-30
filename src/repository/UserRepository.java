@@ -20,15 +20,14 @@ public class UserRepository {
     private List<Student> students;
     private List<Librarian> librarians;
 
+    // Constructor - initializes user lists and loads data from files
     public UserRepository() {
         students = new ArrayList<>();
         librarians = new ArrayList<>();
         load();
     }
 
-    /**
-     * Finds a student by student ID.
-     */
+    // Finds a student by their student ID
     public Student findStudent(String studentId) {
 
         for (Student student : students) {
@@ -40,9 +39,7 @@ public class UserRepository {
         return null;
     }
 
-    /**
-     * Finds a librarian by personnel code.
-     */
+    // Finds a librarian by their personnel code
     public Librarian findLibrarian(String personnelCode) {
 
         for (Librarian librarian : librarians) {
@@ -54,19 +51,19 @@ public class UserRepository {
         return null;
     }
 
+    // Adds a new student to the repository and saves to file
     public void addStudent(Student student) {
         students.add(student);
         save();
     }
 
+    // Adds a new librarian to the repository and saves to file
     public void addLibrarian(Librarian librarian) {
         librarians.add(librarian);
         save();
     }
 
-    /**
-     * Saves users.
-     */
+    // Saves both student and librarian lists to their respective files
     public void save() {
 
         try {
@@ -77,36 +74,37 @@ public class UserRepository {
         }
     }
 
-    /**
-     * Loads users.
-     */
+    // Loads both student and librarian lists from their respective files
     @SuppressWarnings("unchecked")
     public void load() {
 
         try {
 
+            // Load students if file exists
             File studentFile = new File(STUDENTS_FILE);
-
             if (studentFile.exists()) {
                 students = (List<Student>) FileUtil.load(STUDENTS_FILE);
             }
 
+            // Load librarians if file exists
             File librarianFile = new File(LIBRARIANS_FILE);
-
             if (librarianFile.exists()) {
                 librarians = (List<Librarian>) FileUtil.load(LIBRARIANS_FILE);
             }
 
         } catch (IOException | ClassNotFoundException e) {
+            // Initialize with empty lists on error
             students = new ArrayList<>();
             librarians = new ArrayList<>();
         }
     }
 
+    // Returns all students
     public List<Student> getStudents() {
         return students;
     }
 
+    // Returns all librarians
     public List<Librarian> getLibrarians() {
         return librarians;
     }

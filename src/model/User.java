@@ -6,8 +6,10 @@ import java.io.Serializable;
  * Abstract base class for all users of the library system.
  */
 public abstract class User implements Serializable {
+    // User attributes
     private String firstName, lastName, email, password;
 
+    // Constructor with all fields
     public User(String firstName, String lastName, String email, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -15,6 +17,7 @@ public abstract class User implements Serializable {
         this.password = password;
     }
 
+    // Getters and setters for all attributes
     public String getFirstName() {
         return firstName;
     }
@@ -47,6 +50,7 @@ public abstract class User implements Serializable {
         this.password = password;
     }
 
+    // String representation of the user
     @Override
     public String toString() {
         return "کاربر{" +

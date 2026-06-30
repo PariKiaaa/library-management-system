@@ -3,21 +3,15 @@ package src.util;
 import java.io.*;
 
 /**
- * Utility class for saving and loading objects from files.
+ * Utility class for file operations with serialization support.
  */
 public final class FileUtil {
 
-    // Prevent instantiation
+    // Private constructor to prevent instantiation
     private FileUtil() {
     }
 
-    /**
-     * Saves an object to a file.
-     *
-     * @param filePath path of the file
-     * @param object object to save
-     * @throws IOException if an I/O error occurs
-     */
+    // Saves an object to a file using serialization
     public static void save(String filePath, Object object) throws IOException {
         try (ObjectOutputStream outputStream =
                      new ObjectOutputStream(new FileOutputStream(filePath))) {
@@ -26,14 +20,7 @@ public final class FileUtil {
         }
     }
 
-    /**
-     * Loads an object from a file.
-     *
-     * @param filePath path of the file
-     * @return loaded object
-     * @throws IOException if an I/O error occurs
-     * @throws ClassNotFoundException if the object's class cannot be found
-     */
+    // Loads an object from a file using deserialization
     public static Object load(String filePath)
             throws IOException, ClassNotFoundException {
 

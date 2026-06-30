@@ -16,10 +16,12 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
 
+// Dialog for adding and editing books
 public class BookDialog extends JDialog {
 
     private static final String COVERS_DIR = "covers";
 
+    // Form fields
     private JTextField titleField;
     private JTextField authorField;
     private JTextField isbnField;
@@ -31,15 +33,17 @@ public class BookDialog extends JDialog {
     private JLabel imagePreviewLabel;
     private String imagePath = "";
 
+    // Services and state
     private final BookService bookService;
     private final Book existingBook;
     private boolean confirmed = false;
 
-    // Colors
+    // UI Colors
     private final Color PRIMARY_COLOR = new Color(255, 107, 107);
     private final Color BACKGROUND_COLOR = new Color(245, 247, 250);
     private final Color HEADER_COLOR = new Color(200, 200, 200);
 
+    // Constructors
     public BookDialog(Frame parent) {
         super(parent, "افزودن کتاب", true);
         this.existingBook = null;
@@ -62,12 +66,14 @@ public class BookDialog extends JDialog {
         loadBook();
     }
 
+    // Initialize dialog UI
     private void initializeDialog() {
         setSize(650, 850);
         setLocationRelativeTo(getParent());
         getContentPane().setBackground(BACKGROUND_COLOR);
         setLayout(new BorderLayout(10, 10));
 
+        // Apply Nimbus look and feel
         try {
             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
             UIManager.put("nimbusBase", PRIMARY_COLOR);
@@ -99,12 +105,14 @@ public class BookDialog extends JDialog {
         add(scrollPane, BorderLayout.CENTER);
         add(createButtons(), BorderLayout.SOUTH);
 
+        // For new books, available copies follows total copies
         if (existingBook == null) {
             availableCopiesSpinner.setEnabled(false);
             totalCopiesSpinner.addChangeListener(e -> availableCopiesSpinner.setValue(totalCopiesSpinner.getValue()));
         }
     }
 
+    // Create form panel with all fields
     private JPanel createForm() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(BACKGROUND_COLOR);
@@ -117,7 +125,7 @@ public class BookDialog extends JDialog {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
 
-        // Title
+        // Title field
         gbc.gridx = 0;
         gbc.gridy = 0;
         JLabel titleLabel = new JLabel("عنوان:");
@@ -133,13 +141,13 @@ public class BookDialog extends JDialog {
             BorderFactory.createLineBorder(PRIMARY_COLOR, 1),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
-        // تنظیم راست‌به‌چپ برای تایپ فارسی
+        // RTL for Persian text
         titleField.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         titleField.setHorizontalAlignment(JTextField.RIGHT);
         gbc.gridx = 1;
         panel.add(titleField, gbc);
 
-        // Author
+        // Author field
         gbc.gridx = 0;
         gbc.gridy = 1;
         JLabel authorLabel = new JLabel("نویسنده:");
@@ -155,13 +163,13 @@ public class BookDialog extends JDialog {
             BorderFactory.createLineBorder(PRIMARY_COLOR, 1),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
-        // تنظیم راست‌به‌چپ برای تایپ فارسی
+        // RTL for Persian text
         authorField.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         authorField.setHorizontalAlignment(JTextField.RIGHT);
         gbc.gridx = 1;
         panel.add(authorField, gbc);
 
-        // ISBN
+        // ISBN field
         gbc.gridx = 0;
         gbc.gridy = 2;
         JLabel isbnLabel = new JLabel("شابک:");
@@ -177,13 +185,13 @@ public class BookDialog extends JDialog {
             BorderFactory.createLineBorder(PRIMARY_COLOR, 1),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
-        // شابک معمولاً انگلیسی است، پس چپ‌به‌راست
+        // ISBN is usually English, so LTR
         isbnField.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
         isbnField.setHorizontalAlignment(JTextField.LEFT);
         gbc.gridx = 1;
         panel.add(isbnField, gbc);
 
-        // Publisher
+        // Publisher field
         gbc.gridx = 0;
         gbc.gridy = 3;
         JLabel publisherLabel = new JLabel("ناشر:");
@@ -199,13 +207,13 @@ public class BookDialog extends JDialog {
             BorderFactory.createLineBorder(PRIMARY_COLOR, 1),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
-        // تنظیم راست‌به‌چپ برای تایپ فارسی
+        // RTL for Persian text
         publisherField.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         publisherField.setHorizontalAlignment(JTextField.RIGHT);
         gbc.gridx = 1;
         panel.add(publisherField, gbc);
 
-        // Year
+        // Year field
         gbc.gridx = 0;
         gbc.gridy = 4;
         JLabel yearLabel = new JLabel("سال انتشار:");
@@ -221,7 +229,7 @@ public class BookDialog extends JDialog {
         gbc.gridx = 1;
         panel.add(yearSpinner, gbc);
 
-        // Category
+        // Category combo box
         gbc.gridx = 0;
         gbc.gridy = 5;
         JLabel categoryLabel = new JLabel("دسته‌بندی:");
@@ -237,7 +245,7 @@ public class BookDialog extends JDialog {
         gbc.gridx = 1;
         panel.add(categoryCombo, gbc);
 
-        // Total Copies
+        // Total copies spinner
         gbc.gridx = 0;
         gbc.gridy = 6;
         JLabel totalLabel = new JLabel("تعداد کل:");
@@ -253,7 +261,7 @@ public class BookDialog extends JDialog {
         gbc.gridx = 1;
         panel.add(totalCopiesSpinner, gbc);
 
-        // Available Copies
+        // Available copies spinner
         gbc.gridx = 0;
         gbc.gridy = 7;
         JLabel availableLabel = new JLabel("تعداد موجود:");
@@ -269,7 +277,7 @@ public class BookDialog extends JDialog {
         gbc.gridx = 1;
         panel.add(availableCopiesSpinner, gbc);
 
-        // Book Cover
+        // Book cover image section
         gbc.gridx = 0;
         gbc.gridy = 8;
         JLabel coverLabel = new JLabel("تصویر جلد:");
@@ -282,15 +290,16 @@ public class BookDialog extends JDialog {
         imagePanel.setBackground(BACKGROUND_COLOR);
         imagePanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         
+        // Button panel for image operations
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBackground(BACKGROUND_COLOR);
         buttonPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         
-        // دکمه انتخاب تصویر
+        // Browse image button
         JButton browseButton = createStyledButton("انتخاب تصویر", new Color(52, 152, 219));
         browseButton.addActionListener(e -> chooseImage());
         
-        // دکمه جستجوی تصویر در گوگل
+        // Google image search button
         JButton googleSearchButton = createGoogleSearchButton();
         
         buttonPanel.add(googleSearchButton);
@@ -298,6 +307,7 @@ public class BookDialog extends JDialog {
         
         imagePanel.add(buttonPanel, BorderLayout.NORTH);
 
+        // Image preview label
         imagePreviewLabel = new JLabel("بدون تصویر", JLabel.CENTER);
         imagePreviewLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
         imagePreviewLabel.setForeground(Color.BLACK);
@@ -317,6 +327,7 @@ public class BookDialog extends JDialog {
         return panel;
     }
 
+    // Create button panel
     private JPanel createButtons() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
         panel.setBackground(HEADER_COLOR);
@@ -338,6 +349,7 @@ public class BookDialog extends JDialog {
         return panel;
     }
 
+    // Create styled button with hover effect
     private JButton createStyledButton(String text, Color color) {
         JButton button = new JButton(text);
         button.setFont(new Font("Tahoma", Font.BOLD, 18));
@@ -351,6 +363,7 @@ public class BookDialog extends JDialog {
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         
+        // Hover effect
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(color.darker());
@@ -363,33 +376,36 @@ public class BookDialog extends JDialog {
         return button;
     }
 
-private JButton createGoogleSearchButton() {
-    JButton googleButton = new JButton("جستجوی خودکار");
-    googleButton.setFont(new Font("Tahoma", Font.BOLD, 18)); 
-    googleButton.setBackground(new Color(211, 108, 240));
-    googleButton.setForeground(Color.BLACK);
-    googleButton.setFocusPainted(false);
-    googleButton.setBorder(BorderFactory.createCompoundBorder(
-        BorderFactory.createLineBorder(new Color(211, 108, 240).darker(), 2),
-        new EmptyBorder(10, 25, 10, 25) 
-    ));
-    googleButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-    googleButton.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-    
-    googleButton.addActionListener(e -> searchImageOnGoogle());
-    
-    googleButton.addMouseListener(new java.awt.event.MouseAdapter() {
-        public void mouseEntered(java.awt.event.MouseEvent evt) {
-            googleButton.setBackground(new Color(211, 108, 240).darker());
-        }
-        public void mouseExited(java.awt.event.MouseEvent evt) {
-            googleButton.setBackground(new Color(211, 108, 240));
-        }
-    });
-    
-    return googleButton;
-}
-    // متد جستجوی تصویر در گوگل
+    // Create Google image search button
+    private JButton createGoogleSearchButton() {
+        JButton googleButton = new JButton("جستجوی خودکار");
+        googleButton.setFont(new Font("Tahoma", Font.BOLD, 18)); 
+        googleButton.setBackground(new Color(211, 108, 240));
+        googleButton.setForeground(Color.BLACK);
+        googleButton.setFocusPainted(false);
+        googleButton.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(211, 108, 240).darker(), 2),
+            new EmptyBorder(10, 25, 10, 25) 
+        ));
+        googleButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        googleButton.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        
+        googleButton.addActionListener(e -> searchImageOnGoogle());
+        
+        // Hover effect
+        googleButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                googleButton.setBackground(new Color(211, 108, 240).darker());
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                googleButton.setBackground(new Color(211, 108, 240));
+            }
+        });
+        
+        return googleButton;
+    }
+
+    // Search for book image on Google
     private void searchImageOnGoogle() {
         String bookTitle = titleField.getText().trim();
         
@@ -405,22 +421,14 @@ private JButton createGoogleSearchButton() {
         }
         
         try {
-            // ساخت عبارت جستجو
+            // Build search query
             String searchQuery = "کتاب " + bookTitle;
             String encodedQuery = URLEncoder.encode(searchQuery, "UTF-8");
             String googleImageUrl = "https://www.google.com/search?q=" + encodedQuery + "&tbm=isch";
             
-            // باز کردن در مرورگر پیش‌فرض
+            // Open in default browser
             if (Desktop.isDesktopSupported()) {
                 Desktop.getDesktop().browse(URI.create(googleImageUrl));
-                
-                // JOptionPane.showMessageDialog(
-                //     this,
-                //     "صفحه جستجوی تصاویر گوگل باز شد.\n" +
-                //     "تصویر مورد نظر را پیدا کنید، دانلود و سپس در فرم انتخاب کنید.",
-                //     "جستجوی تصویر",
-                //     JOptionPane.INFORMATION_MESSAGE
-                // );
             } else {
                 JOptionPane.showMessageDialog(
                     this,
@@ -439,6 +447,7 @@ private JButton createGoogleSearchButton() {
         }
     }
 
+    // Load existing book data into form
     private void loadBook() {
         if (existingBook != null) {
             isbnField.setText(existingBook.getIsbn());
@@ -448,6 +457,7 @@ private JButton createGoogleSearchButton() {
             publisherField.setText(existingBook.getPublisher());
             yearSpinner.setValue(existingBook.getYear());
 
+            // Set category
             boolean categoryFound = false;
             for (int i = 0; i < categoryCombo.getItemCount(); i++) {
                 if (categoryCombo.getItemAt(i).equals(existingBook.getCategory())) {
@@ -467,6 +477,7 @@ private JButton createGoogleSearchButton() {
         }
     }
 
+    // Update image preview
     private void updateImagePreview() {
         if (imagePath != null && !imagePath.isEmpty()) {
             File imageFile = new File(COVERS_DIR, imagePath);
@@ -488,114 +499,117 @@ private JButton createGoogleSearchButton() {
         }
     }
 
-private void chooseImage() {
-    JFileChooser fileChooser = new JFileChooser();
-    fileChooser.setDialogTitle("انتخاب تصویر جلد کتاب");
-    fileChooser.setFileFilter(new FileNameExtensionFilter(
-            "فایل‌های تصویری", "jpg", "jpeg", "png"));
+    // Choose image file
+    private void chooseImage() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("انتخاب تصویر جلد کتاب");
+        fileChooser.setFileFilter(new FileNameExtensionFilter(
+                "فایل‌های تصویری", "jpg", "jpeg", "png"));
 
-    // ===== تنظیمات بزرگنمایی فایل‌چووزر =====
-    UIManager.put("FileChooser.font", new Font("Tahoma", Font.PLAIN, 18));
-    UIManager.put("FileChooser.listFont", new Font("Tahoma", Font.PLAIN, 18));
-    UIManager.put("FileChooser.iconFont", new Font("Tahoma", Font.PLAIN, 18));
-    UIManager.put("FileChooser.fileNameLabelFont", new Font("Tahoma", Font.PLAIN, 18));
-    UIManager.put("FileChooser.filesOfTypeLabelFont", new Font("Tahoma", Font.PLAIN, 18));
-    UIManager.put("FileChooser.lookInLabelFont", new Font("Tahoma", Font.PLAIN, 18));
-    UIManager.put("FileChooser.saveInLabelFont", new Font("Tahoma", Font.PLAIN, 18));
-    UIManager.put("FileChooser.folderNameLabelFont", new Font("Tahoma", Font.PLAIN, 18));
-    
-    SwingUtilities.updateComponentTreeUI(fileChooser);
-    fileChooser.setPreferredSize(new Dimension(900, 600));
+        // Configure file chooser font
+        UIManager.put("FileChooser.font", new Font("Tahoma", Font.PLAIN, 18));
+        UIManager.put("FileChooser.listFont", new Font("Tahoma", Font.PLAIN, 18));
+        UIManager.put("FileChooser.iconFont", new Font("Tahoma", Font.PLAIN, 18));
+        UIManager.put("FileChooser.fileNameLabelFont", new Font("Tahoma", Font.PLAIN, 18));
+        UIManager.put("FileChooser.filesOfTypeLabelFont", new Font("Tahoma", Font.PLAIN, 18));
+        UIManager.put("FileChooser.lookInLabelFont", new Font("Tahoma", Font.PLAIN, 18));
+        UIManager.put("FileChooser.saveInLabelFont", new Font("Tahoma", Font.PLAIN, 18));
+        UIManager.put("FileChooser.folderNameLabelFont", new Font("Tahoma", Font.PLAIN, 18));
+        
+        SwingUtilities.updateComponentTreeUI(fileChooser);
+        fileChooser.setPreferredSize(new Dimension(900, 600));
 
-    // ===== اضافه کردن پیش‌نمایش تصویر =====
-    JLabel previewLabel = new JLabel("پیش نمایش تصویر", JLabel.CENTER);
-    previewLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
-    previewLabel.setPreferredSize(new Dimension(200, 200));
-    previewLabel.setMinimumSize(new Dimension(200, 200));
-    previewLabel.setBackground(Color.WHITE);
-    previewLabel.setOpaque(true);
-    previewLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
-    
-    // تنظیم پیش‌نمایش وقتی فایلی انتخاب میشه
-    fileChooser.addPropertyChangeListener(JFileChooser.SELECTED_FILE_CHANGED_PROPERTY, evt -> {
-        File selectedFile = fileChooser.getSelectedFile();
-        if (selectedFile != null && selectedFile.exists() && selectedFile.isFile()) {
-            String fileName = selectedFile.getName().toLowerCase();
-            // بررسی اینکه فایل تصویر هست یا نه
-            if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || 
-                fileName.endsWith(".png") || fileName.endsWith(".gif") || 
-                fileName.endsWith(".bmp")) {
-                try {
-                    // بارگذاری و تغییر اندازه تصویر
-                    ImageIcon icon = new ImageIcon(selectedFile.getAbsolutePath());
-                    Image scaledImage = icon.getImage().getScaledInstance(
-                        180, 180, Image.SCALE_SMOOTH
-                    );
-                    previewLabel.setIcon(new ImageIcon(scaledImage));
-                    previewLabel.setText("");
-                    previewLabel.setHorizontalAlignment(JLabel.CENTER);
-                } catch (Exception ex) {
+        // Add image preview accessory
+        JLabel previewLabel = new JLabel("پیش نمایش تصویر", JLabel.CENTER);
+        previewLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        previewLabel.setPreferredSize(new Dimension(200, 200));
+        previewLabel.setMinimumSize(new Dimension(200, 200));
+        previewLabel.setBackground(Color.WHITE);
+        previewLabel.setOpaque(true);
+        previewLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
+        
+        // Update preview when file is selected
+        fileChooser.addPropertyChangeListener(JFileChooser.SELECTED_FILE_CHANGED_PROPERTY, evt -> {
+            File selectedFile = fileChooser.getSelectedFile();
+            if (selectedFile != null && selectedFile.exists() && selectedFile.isFile()) {
+                String fileName = selectedFile.getName().toLowerCase();
+                // Check if it's an image file
+                if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || 
+                    fileName.endsWith(".png") || fileName.endsWith(".gif") || 
+                    fileName.endsWith(".bmp")) {
+                    try {
+                        ImageIcon icon = new ImageIcon(selectedFile.getAbsolutePath());
+                        Image scaledImage = icon.getImage().getScaledInstance(
+                            180, 180, Image.SCALE_SMOOTH
+                        );
+                        previewLabel.setIcon(new ImageIcon(scaledImage));
+                        previewLabel.setText("");
+                        previewLabel.setHorizontalAlignment(JLabel.CENTER);
+                    } catch (Exception ex) {
+                        previewLabel.setIcon(null);
+                        previewLabel.setText("خطا در بارگذاری");
+                    }
+                } else {
                     previewLabel.setIcon(null);
-                    previewLabel.setText("خطا در بارگذاری");
+                    previewLabel.setText("فایل تصویر نیست");
                 }
             } else {
                 previewLabel.setIcon(null);
-                previewLabel.setText("فایل تصویر نیست");
+                previewLabel.setText("پیش نمایش تصویر");
             }
-        } else {
-            previewLabel.setIcon(null);
-            previewLabel.setText("پیش نمایش تصویر");
-        }
-    });
-    
-    // اضافه کردن پیش‌نمایش به عنوان Accessory
-    fileChooser.setAccessory(previewLabel);
+        });
+        
+        fileChooser.setAccessory(previewLabel);
 
-    int result = fileChooser.showOpenDialog(this);
-    if (result == JFileChooser.APPROVE_OPTION) {
-        File selectedFile = fileChooser.getSelectedFile();
-        String path = selectedFile.getAbsolutePath();
-        String lowerPath = path.toLowerCase();
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            String path = selectedFile.getAbsolutePath();
+            String lowerPath = path.toLowerCase();
 
-        if (lowerPath.endsWith(".jpg") || lowerPath.endsWith(".jpeg") || lowerPath.endsWith(".png")) {
-            File coversDir = new File(COVERS_DIR);
-            if (!coversDir.exists()) {
-                coversDir.mkdirs();
-            }
-
-            String extension = getFileExtension(selectedFile.getName());
-            String uniqueName = System.currentTimeMillis() + extension;
-            File destFile = new File(coversDir, uniqueName);
-
-            try (FileInputStream fis = new FileInputStream(selectedFile);
-                 FileOutputStream fos = new FileOutputStream(destFile)) {
-
-                byte[] buffer = new byte[8192];
-                int bytesRead;
-                while ((bytesRead = fis.read(buffer)) != -1) {
-                    fos.write(buffer, 0, bytesRead);
+            // Validate image format
+            if (lowerPath.endsWith(".jpg") || lowerPath.endsWith(".jpeg") || lowerPath.endsWith(".png")) {
+                File coversDir = new File(COVERS_DIR);
+                if (!coversDir.exists()) {
+                    coversDir.mkdirs();
                 }
 
-                imagePath = uniqueName;
-                updateImagePreview();
-            } catch (IOException ex) {
+                // Copy image to covers directory
+                String extension = getFileExtension(selectedFile.getName());
+                String uniqueName = System.currentTimeMillis() + extension;
+                File destFile = new File(coversDir, uniqueName);
+
+                try (FileInputStream fis = new FileInputStream(selectedFile);
+                     FileOutputStream fos = new FileOutputStream(destFile)) {
+
+                    byte[] buffer = new byte[8192];
+                    int bytesRead;
+                    while ((bytesRead = fis.read(buffer)) != -1) {
+                        fos.write(buffer, 0, bytesRead);
+                    }
+
+                    imagePath = uniqueName;
+                    updateImagePreview();
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "خطا در کپی کردن تصویر: " + ex.getMessage(),
+                            "خطا",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            } else {
                 JOptionPane.showMessageDialog(
                         this,
-                        "خطا در کپی کردن تصویر: " + ex.getMessage(),
-                        "خطا",
+                        "لطفاً یک تصویر معتبر انتخاب کنید (jpg, jpeg, png).",
+                        "فایل نامعتبر",
                         JOptionPane.ERROR_MESSAGE
                 );
             }
-        } else {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "لطفاً یک تصویر معتبر انتخاب کنید (jpg, jpeg, png).",
-                    "فایل نامعتبر",
-                    JOptionPane.ERROR_MESSAGE
-            );
         }
     }
-}
+
+    // Get file extension
     private String getFileExtension(String fileName) {
         int lastIndexOf = fileName.lastIndexOf(".");
         if (lastIndexOf == -1) {
@@ -604,6 +618,7 @@ private void chooseImage() {
         return fileName.substring(lastIndexOf);
     }
 
+    // Save book data
     private void saveBook() {
         String title = titleField.getText().trim();
         String author = authorField.getText().trim();
@@ -614,6 +629,7 @@ private void chooseImage() {
         int totalCopies = (Integer) totalCopiesSpinner.getValue();
         int availableCopies = (Integer) availableCopiesSpinner.getValue();
 
+        // Validate input
         if (!validateInput(title, author, isbn, publisher, year, category, totalCopies, availableCopies)) {
             return;
         }
@@ -640,8 +656,10 @@ private void chooseImage() {
         }
     }
 
+    // Validate form input
     private boolean validateInput(String title, String author, String isbn, String publisher,
                                  int year, String category, int totalCopies, int availableCopies) {
+        // Check required fields
         if (title.isEmpty() || author.isEmpty() || isbn.isEmpty() || publisher.isEmpty()) {
             JOptionPane.showMessageDialog(
                     this,
@@ -652,6 +670,7 @@ private void chooseImage() {
             return false;
         }
 
+        // Validate year range
         if (year < 1300 || year > 1405) {
             JOptionPane.showMessageDialog(
                     this,
@@ -662,6 +681,7 @@ private void chooseImage() {
             return false;
         }
 
+        // Validate copy counts
         if (totalCopies < 0) {
             JOptionPane.showMessageDialog(
                     this,
@@ -695,6 +715,7 @@ private void chooseImage() {
         return true;
     }
 
+    // Reset form to default values
     private void resetForm() {
         titleField.setText("");
         authorField.setText("");
@@ -708,15 +729,18 @@ private void chooseImage() {
         updateImagePreview();
     }
 
+    // Cancel and close dialog
     private void onCancel() {
         confirmed = false;
         dispose();
     }
 
+    // Check if dialog was confirmed
     public boolean isConfirmed() {
         return confirmed;
     }
 
+    // Get the book object
     public Book getBook() {
         return existingBook != null ? existingBook : new Book(
                 isbnField.getText().trim(),

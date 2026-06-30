@@ -7,9 +7,11 @@ import java.util.Objects;
  * Represents a book in the library system.
  */
 public class Book implements Serializable {
+    // Book attributes
     private String isbn, title, author, publisher, category, imagePath;
     private int year, totalCopies, availableCopies;
 
+    // Constructor with all fields
     public Book(String isbn, String title, String author, String publisher,
                 int year, String category, int totalCopies,
                 int availableCopies, String imagePath) {
@@ -24,6 +26,7 @@ public class Book implements Serializable {
         this.imagePath = imagePath;
     }
 
+    // Getters and setters for all attributes
     public String getIsbn() {
         return isbn;
     }
@@ -96,6 +99,7 @@ public class Book implements Serializable {
         this.imagePath = imagePath;
     }
 
+    // Equality check based on ISBN
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -104,11 +108,13 @@ public class Book implements Serializable {
         return Objects.equals(isbn, book.isbn);
     }
 
+    // Hash code based on ISBN
     @Override
     public int hashCode() {
         return Objects.hash(isbn);
     }
 
+    // String representation of the book
     @Override
     public String toString() {
         return "کتاب{" +
